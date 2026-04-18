@@ -65,6 +65,15 @@ export async function POST(request: NextRequest) {
 
     const userId = data.user.id;
 
+    // If signUp didn't create a session (e.g. email confirmation enabled),
+    // explicitly sign in to establish a session so the user can proceed
+    if (!data.session) {
+      await supabase.auth.signInWithPassword({
+        email: payload.email,
+        password: payload.password,
+      });
+    }
+
     // Verify profile was created by trigger, create fallback if not
     const { data: existingProfileRow } = await serviceClient
       .from("profiles")
