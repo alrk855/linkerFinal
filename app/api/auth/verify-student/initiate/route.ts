@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import type { Database } from "@/types/database";
+import { createRedirectClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 
@@ -13,7 +12,6 @@ function encodeState(payload: Record<string, unknown>): string {
 // GET: browser navigates here directly — redirect to Azure OAuth
 export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {
-    // Verify the user is an authenticated student
     const { user } = await requireRole(request, "student");
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
@@ -24,24 +22,7 @@ export async function GET(request: NextRequest) {
       flow: "verify_student",
     });
 
-    // Create a fresh supabase client that captures cookies on a mutable array
-    // so we can forward PKCE cookies onto the redirect response
-    const pendingCookies: { name: string; value: string; options: Record<string, unknown> }[] = [];
-
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            pendingCookies.push(...cookiesToSet);
-          },
-        },
-      }
-    );
+    const { supabase, finish } = createRedirectClient(request);
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
@@ -56,11 +37,7 @@ export async function GET(request: NextRequest) {
       throw new ApiError(500, "OAUTH_INIT_FAILED", "Failed to initiate Azure verification flow.");
     }
 
-    const response = NextResponse.redirect(data.url);
-    for (const cookie of pendingCookies) {
-      response.cookies.set(cookie.name, cookie.value, cookie.options);
-    }
-    return response;
+    return finish(NextResponse.redirect(data.url));
   });
 }
 

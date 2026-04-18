@@ -17,8 +17,9 @@ export async function POST(request: NextRequest) {
     });
 
     const payload = await parseJsonBody(request, signupBodySchema);
-
     const serviceClient = createServiceClient();
+
+    // Check username uniqueness
     const { data: existingProfile, error: usernameLookupError } = await serviceClient
       .from("profiles")
       .select("id")
@@ -28,53 +29,50 @@ export async function POST(request: NextRequest) {
     if (usernameLookupError) {
       throw new ApiError(500, "DB_ERROR", "Could not validate username.");
     }
-
     if (existingProfile) {
-      throw new ApiError(
-        409,
-        "CONFLICT",
-        "Username is already in use. Please choose another username."
-      );
+      throw new ApiError(409, "CONFLICT", "Username is already in use. Please choose another username.");
     }
 
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.signUp({
+    // Create user via admin API — bypasses email confirmation entirely
+    const { data: adminData, error: adminError } = await serviceClient.auth.admin.createUser({
       email: payload.email,
       password: payload.password,
-      options: {
-        data: {
-          username: payload.username,
-          full_name: payload.full_name,
-          role: payload.role,
-        },
+      email_confirm: true, // Mark email as confirmed immediately
+      user_metadata: {
+        username: payload.username,
+        full_name: payload.full_name,
+        role: payload.role,
       },
     });
 
-    if (error) {
-      const loweredMessage = error.message.toLowerCase();
-      if (loweredMessage.includes("already registered")) {
+    if (adminError) {
+      const msg = adminError.message.toLowerCase();
+      if (msg.includes("already") || msg.includes("exists") || msg.includes("registered")) {
         throw new ApiError(409, "CONFLICT", "Email is already registered.");
       }
-
-      throw new ApiError(400, "VALIDATION_ERROR", "Unable to sign up with provided credentials.");
+      console.error("Admin createUser failed:", adminError);
+      throw new ApiError(400, "VALIDATION_ERROR", "Unable to create account.");
     }
 
-    if (!data.user?.id) {
+    if (!adminData.user?.id) {
       throw new ApiError(500, "INTERNAL_SERVER_ERROR", "Signup did not return a user ID.");
     }
 
-    const userId = data.user.id;
+    const userId = adminData.user.id;
 
-    // If signUp didn't create a session (e.g. email confirmation enabled),
-    // explicitly sign in to establish a session so the user can proceed
-    if (!data.session) {
-      await supabase.auth.signInWithPassword({
-        email: payload.email,
-        password: payload.password,
-      });
+    // Now sign the user in to establish a session (sets cookies via cookies())
+    const supabase = await createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: payload.email,
+      password: payload.password,
+    });
+
+    if (signInError) {
+      console.error("Post-signup signIn failed:", signInError);
+      // User was created but session failed — they can still sign in manually
     }
 
-    // Verify profile was created by trigger, create fallback if not
+    // Ensure profile exists (trigger may or may not have fired)
     const { data: existingProfileRow } = await serviceClient
       .from("profiles")
       .select("id")
@@ -82,67 +80,47 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (!existingProfileRow) {
-      const { error: profileInsertError } = await serviceClient
-        .from("profiles")
-        .insert({
-          id: userId,
-          username: payload.username,
-          full_name: payload.full_name,
-          role: payload.role,
-        });
-
+      const { error: profileInsertError } = await serviceClient.from("profiles").insert({
+        id: userId,
+        username: payload.username,
+        full_name: payload.full_name,
+        role: payload.role,
+      });
       if (profileInsertError) {
-        console.error("Fallback profile creation failed:", profileInsertError);
+        console.error("Profile creation failed:", profileInsertError);
         throw new ApiError(500, "DB_ERROR", "Failed to create user profile.");
       }
     }
 
     // Create role-specific profile
     if (payload.role === "student") {
-      const { data: existingStudentProfile } = await serviceClient
+      const { data: sp } = await serviceClient
         .from("student_profiles")
         .select("id")
         .eq("profile_id", userId)
         .maybeSingle();
 
-      if (!existingStudentProfile) {
-        const { error: studentInsertError } = await serviceClient
-          .from("student_profiles")
-          .insert({
-            profile_id: userId,
-          });
-
-        if (studentInsertError) {
-          console.error("Student profile creation failed:", studentInsertError);
-        }
+      if (!sp) {
+        await serviceClient.from("student_profiles").insert({ profile_id: userId });
       }
     } else if (payload.role === "company") {
-      const { data: existingCompanyProfile } = await serviceClient
+      const { data: cp } = await serviceClient
         .from("company_profiles")
         .select("id")
         .eq("profile_id", userId)
         .maybeSingle();
 
-      if (!existingCompanyProfile) {
-        const { error: companyInsertError } = await serviceClient
-          .from("company_profiles")
-          .insert({
-            profile_id: userId,
-            company_name: payload.company_name || payload.full_name,
-            company_email: payload.email,
-            company_website: payload.website || null,
-            approval_status: "pending",
-          });
-
-        if (companyInsertError) {
-          console.error("Company profile creation failed:", companyInsertError);
-        }
+      if (!cp) {
+        await serviceClient.from("company_profiles").insert({
+          profile_id: userId,
+          company_name: payload.company_name || payload.full_name,
+          company_email: payload.email,
+          company_website: payload.website || null,
+          approval_status: "pending",
+        });
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      user_id: userId,
-    });
+    return NextResponse.json({ success: true, user_id: userId });
   });
 }
