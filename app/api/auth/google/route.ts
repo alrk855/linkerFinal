@@ -3,6 +3,8 @@ import { createRedirectClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+const GOOGLE_ROLE_COOKIE = "linker_oauth_role";
+
 export async function GET(request: NextRequest) {
   const role = request.nextUrl.searchParams.get("role");
   const appOrigin = request.nextUrl.origin;
@@ -11,12 +13,6 @@ export async function GET(request: NextRequest) {
   const { supabase, finish } = createRedirectClient(request);
 
   const oauthOptions: Record<string, unknown> = { redirectTo: callbackUrl.toString() };
-
-  if (role === "student" || role === "company") {
-    oauthOptions.queryParams = {
-      state: Buffer.from(JSON.stringify({ role })).toString("base64url"),
-    };
-  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -28,5 +24,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/signin?error=oauth_init_failed", appOrigin));
   }
 
-  return finish(NextResponse.redirect(data.url));
+  const response = NextResponse.redirect(data.url);
+
+  if (role === "student" || role === "company") {
+    response.cookies.set(GOOGLE_ROLE_COOKIE, role, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+      path: "/",
+      maxAge: 10 * 60,
+    });
+  } else {
+    response.cookies.delete(GOOGLE_ROLE_COOKIE);
+  }
+
+  return finish(response);
 }

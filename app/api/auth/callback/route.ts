@@ -4,6 +4,9 @@ import { getProfileById } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
+const GOOGLE_ROLE_COOKIE = "linker_oauth_role";
+const VERIFY_USER_COOKIE = "linker_verify_user_id";
+
 type OAuthState = {
   userId?: string;
   role?: "student" | "company";
@@ -31,12 +34,29 @@ function isUkimEmail(email: string): boolean {
     (n.includes("@") && (n.split("@")[1]?.endsWith(".ukim.edu.mk") ?? false));
 }
 
+function clearFlowCookies(response: NextResponse) {
+  response.cookies.delete(GOOGLE_ROLE_COOKIE);
+  response.cookies.delete(VERIFY_USER_COOKIE);
+  return response;
+}
+
+function signinErrorUrl(appOrigin: string, code: string, reason?: string): URL {
+  const url = new URL("/auth/signin", appOrigin);
+  url.searchParams.set("error", code);
+  if (reason) {
+    url.searchParams.set("reason", reason.slice(0, 180));
+  }
+  return url;
+}
+
 export async function GET(request: NextRequest) {
   const appOrigin = request.nextUrl.origin;
   const code = request.nextUrl.searchParams.get("code");
 
   if (!code) {
-    return NextResponse.redirect(new URL("/auth/signin?error=missing_code", appOrigin));
+    return clearFlowCookies(
+      NextResponse.redirect(signinErrorUrl(appOrigin, "missing_code"))
+    );
   }
 
   const { supabase, finish } = createRedirectClient(request);
@@ -48,13 +68,30 @@ export async function GET(request: NextRequest) {
     error = result.error;
   } catch (e) {
     console.error("exchangeCodeForSession threw:", e);
-    return finish(NextResponse.redirect(new URL("/auth/signin?error=exchange_exception", appOrigin)));
+    const reason = e instanceof Error ? e.message : "exchange_exception";
+    return finish(
+      clearFlowCookies(
+        NextResponse.redirect(signinErrorUrl(appOrigin, "exchange_exception", reason))
+      )
+    );
   }
 
   if (error || !data?.user) {
     console.error("OAuth exchange failed:", error?.message);
-    return finish(NextResponse.redirect(new URL("/auth/signin?error=oauth_exchange_failed", appOrigin)));
+    return finish(
+      clearFlowCookies(
+        NextResponse.redirect(
+          signinErrorUrl(appOrigin, "oauth_exchange_failed", error?.message)
+        )
+      )
+    );
   }
+
+  const roleCookie = request.cookies.get(GOOGLE_ROLE_COOKIE)?.value;
+  const requestedRoleFromCookie = roleCookie === "student" || roleCookie === "company"
+    ? roleCookie
+    : undefined;
+  const verifyUserIdFromCookie = request.cookies.get(VERIFY_USER_COOKIE)?.value;
 
   const queryProvider = request.nextUrl.searchParams.get("provider");
   const sessionProvider = data.session?.user.app_metadata.provider || data.user.app_metadata.provider;
@@ -66,7 +103,7 @@ export async function GET(request: NextRequest) {
   try {
     if (provider === "azure_ad" || provider === "azure") {
       const azureEmail = data.user.email;
-      const targetUserId = state.userId;
+      const targetUserId = verifyUserIdFromCookie || state.userId;
 
       if (!targetUserId) {
         redirectPath = "/auth/verify-student?error=missing_state";
@@ -82,7 +119,7 @@ export async function GET(request: NextRequest) {
       }
     } else if (provider === "google") {
       const svc = createServiceClient();
-      const requestedRole = state.role;
+      const requestedRole = requestedRoleFromCookie || state.role;
       const existing = await getProfileById(svc, data.user.id).catch(() => null);
 
       if (!existing) {
@@ -122,5 +159,7 @@ export async function GET(request: NextRequest) {
     redirectPath = "/dashboard";
   }
 
-  return finish(NextResponse.redirect(new URL(redirectPath, appOrigin)));
+  return finish(
+    clearFlowCookies(NextResponse.redirect(new URL(redirectPath, appOrigin)))
+  );
 }
