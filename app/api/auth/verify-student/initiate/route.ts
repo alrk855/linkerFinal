@@ -14,8 +14,9 @@ export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {
     const { user } = await requireRole(request, "student");
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-    const redirectTo = `${appUrl}/api/auth/callback?provider=azure_ad`;
+    const appOrigin = request.nextUrl.origin;
+    const callbackUrl = new URL("/api/auth/callback", appOrigin);
+    callbackUrl.searchParams.set("provider", "azure_ad");
 
     const state = encodeState({
       userId: user.id,
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
       options: {
-        redirectTo,
+        redirectTo: callbackUrl.toString(),
         skipBrowserRedirect: true,
         queryParams: { state },
       },
@@ -46,8 +47,9 @@ export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
     const { user, supabase } = await requireRole(request, "student");
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-    const redirectTo = `${appUrl}/api/auth/callback?provider=azure_ad`;
+    const appOrigin = request.nextUrl.origin;
+    const callbackUrl = new URL("/api/auth/callback", appOrigin);
+    callbackUrl.searchParams.set("provider", "azure_ad");
 
     const state = encodeState({
       userId: user.id,
@@ -57,7 +59,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
       options: {
-        redirectTo,
+        redirectTo: callbackUrl.toString(),
         skipBrowserRedirect: true,
         queryParams: { state },
       },

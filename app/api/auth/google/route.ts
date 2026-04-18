@@ -5,12 +5,12 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const role = request.nextUrl.searchParams.get("role");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
-  const redirectTo = `${appUrl}/api/auth/callback`;
+  const appOrigin = request.nextUrl.origin;
+  const callbackUrl = new URL("/api/auth/callback", appOrigin);
 
   const { supabase, finish } = createRedirectClient(request);
 
-  const oauthOptions: Record<string, unknown> = { redirectTo };
+  const oauthOptions: Record<string, unknown> = { redirectTo: callbackUrl.toString() };
 
   if (role === "student" || role === "company") {
     oauthOptions.queryParams = {
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
   if (error || !data.url) {
     console.error("Google OAuth init failed:", error?.message);
-    return NextResponse.redirect(new URL("/auth/signin?error=oauth_init_failed", appUrl));
+    return NextResponse.redirect(new URL("/auth/signin?error=oauth_init_failed", appOrigin));
   }
 
   return finish(NextResponse.redirect(data.url));

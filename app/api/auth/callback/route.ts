@@ -32,11 +32,11 @@ function isUkimEmail(email: string): boolean {
 }
 
 export async function GET(request: NextRequest) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+  const appOrigin = request.nextUrl.origin;
   const code = request.nextUrl.searchParams.get("code");
 
   if (!code) {
-    return NextResponse.redirect(new URL("/auth/signin?error=missing_code", baseUrl));
+    return NextResponse.redirect(new URL("/auth/signin?error=missing_code", appOrigin));
   }
 
   const { supabase, finish } = createRedirectClient(request);
@@ -48,12 +48,12 @@ export async function GET(request: NextRequest) {
     error = result.error;
   } catch (e) {
     console.error("exchangeCodeForSession threw:", e);
-    return NextResponse.redirect(new URL("/auth/signin?error=exchange_exception", baseUrl));
+    return finish(NextResponse.redirect(new URL("/auth/signin?error=exchange_exception", appOrigin)));
   }
 
   if (error || !data?.user) {
     console.error("OAuth exchange failed:", error?.message);
-    return NextResponse.redirect(new URL("/auth/signin?error=oauth_exchange_failed", baseUrl));
+    return finish(NextResponse.redirect(new URL("/auth/signin?error=oauth_exchange_failed", appOrigin)));
   }
 
   const queryProvider = request.nextUrl.searchParams.get("provider");
@@ -122,5 +122,5 @@ export async function GET(request: NextRequest) {
     redirectPath = "/dashboard";
   }
 
-  return finish(NextResponse.redirect(new URL(redirectPath, baseUrl)));
+  return finish(NextResponse.redirect(new URL(redirectPath, appOrigin)));
 }
