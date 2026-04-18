@@ -9,6 +9,8 @@ import {
   getStudentSkillsDetailed,
 } from "@/lib/supabase/queries";
 
+export const dynamic = "force-dynamic";
+
 const PROFILE_FIELD_KEYS = [
   "full_name",
   "bio",

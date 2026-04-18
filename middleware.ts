@@ -4,7 +4,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/types/database";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/profile", "/listings", "/company", "/admin"];
+const PROTECTED_PREFIXES = ["/dashboard", "/profile", "/listings", "/company", "/admin", "/acknowledgments", "/notifications"];
 
 // Internationalization definition
 const locales = ['en', 'mk'];

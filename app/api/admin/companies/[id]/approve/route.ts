@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/api/auth-guard";
 import { createServiceClient } from "@/lib/supabase/server";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { uuidSchema } from "@/lib/api/validate";
+export const dynamic = "force-dynamic";
 
 type RouteParams = {
   params: {

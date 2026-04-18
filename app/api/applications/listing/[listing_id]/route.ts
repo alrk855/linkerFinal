@@ -7,6 +7,8 @@ import {
   getSkillMatchScore,
 } from "@/lib/supabase/queries";
 
+export const dynamic = "force-dynamic";
+
 type RouteParams = {
   params: {
     listing_id: string;

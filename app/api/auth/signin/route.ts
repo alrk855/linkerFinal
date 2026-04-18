@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { getClientIp, enforceRateLimit } from "@/lib/api/rate-limit";
 import { parseJsonBody, signinBodySchema } from "@/lib/api/validate";
+export const dynamic = "force-dynamic";
 
 async function resolveEmailFromIdentifier(identifier: string): Promise<string | null> {
   if (identifier.includes("@")) {

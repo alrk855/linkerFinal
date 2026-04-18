@@ -63,13 +63,24 @@ function SignupFormContent() {
 
   const onSubmit = async (values: any) => {
     try {
-      // Mocking submission to /api/auth/signup
+      const { confirmPassword, fullName, companyName, contactName, ...rest } = values;
+      const payload: Record<string, unknown> = {
+        ...rest,
+        role,
+        full_name: role === "student" ? fullName : contactName,
+      };
+      if (role === "company") {
+        payload.company_name = companyName;
+      }
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, role }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to sign up");
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error?.message || "Failed to sign up");
+      }
       toast.success("Account created successfully");
       
       // Post-signup redirection

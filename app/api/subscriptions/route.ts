@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireVerifiedStudent } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { parseJsonBody, subscriptionsCreateBodySchema } from "@/lib/api/validate";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {

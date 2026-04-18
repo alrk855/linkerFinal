@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { verifyStudentInitiateSchema } from "@/lib/api/validate";
+export const dynamic = "force-dynamic";
 
 function encodeState(payload: Record<string, unknown>): string {
   return Buffer.from(JSON.stringify(payload)).toString("base64url");

@@ -3,6 +3,7 @@ import { requireVerifiedStudent } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { parseJsonBody, profileSkillsBodySchema } from "@/lib/api/validate";
 import { getStudentSkillsDetailed, validateSkillIds } from "@/lib/supabase/queries";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {

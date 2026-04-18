@@ -69,6 +69,11 @@ export const signupBodySchema = z.object({
   password: passwordSchema,
   role: profileRoleSchema,
   full_name: z.string().trim().min(2).max(120),
+  company_name: z.string().trim().min(2).max(150).optional(),
+  website: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.string().url().optional()
+  ),
 });
 
 export const signinBodySchema = z.object({

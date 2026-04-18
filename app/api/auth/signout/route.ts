@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { withErrorHandling } from "@/lib/api/errors";
 import { ADMIN_COOKIE_NAME } from "@/lib/api/admin-token";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {

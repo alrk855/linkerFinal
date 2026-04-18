@@ -7,6 +7,8 @@ import {
   uuidSchema,
 } from "@/lib/api/validate";
 
+export const dynamic = "force-dynamic";
+
 type RouteParams = {
   params: {
     id: string;

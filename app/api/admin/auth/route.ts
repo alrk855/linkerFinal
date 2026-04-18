@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { parseJsonBody, adminAuthBodySchema } from "@/lib/api/validate";
 import { ADMIN_COOKIE_NAME, signAdminToken } from "@/lib/api/admin-token";
+export const dynamic = "force-dynamic";
 
 type GoogleTokenInfo = {
   email?: string;

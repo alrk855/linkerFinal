@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { getCompanyByProfileId } from "@/lib/supabase/queries";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {

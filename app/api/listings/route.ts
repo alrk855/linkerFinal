@@ -9,6 +9,8 @@ import {
 } from "@/lib/api/validate";
 import { getListingWithSkills, validateSkillIds } from "@/lib/supabase/queries";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {
     const { supabase } = await requireAuth(request);

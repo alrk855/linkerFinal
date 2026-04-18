@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api/auth-guard";
 import { createServiceClient } from "@/lib/supabase/server";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {

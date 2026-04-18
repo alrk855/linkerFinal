@@ -44,7 +44,14 @@
     "send_code": "Send verification code",
     "resend_code": "Didn't receive a code? Resend",
     "verify": "Verify",
-    "waitlist_msg": "You're on the list. Linker is currently available to UKIM students only. We'll notify you when general access opens."
+    "waitlist_msg": "You're on the list. Linker is currently available to UKIM students only. We'll notify you when general access opens.",
+    "or": "or",
+    "back": "Back",
+    "reset_password": "Reset password",
+    "reset_password_desc": "Enter your email address and we'll send you a link to reset your password.",
+    "reset_email_sent": "If an account with that email exists, we've sent a password reset link.",
+    "send_reset_link": "Send reset link",
+    "back_to_signin": "Back to sign in"
   },
   "Common": {
     "save": "Save",
@@ -57,5 +64,41 @@
     "error": "An error occurred",
     "success": "Success",
     "cookie_consent_text": "This platform uses session cookies to keep you signed in and remember your preferences."
+  },
+  "Terms": {
+    "title": "Terms of Service",
+    "last_updated": "Last updated: April 2026",
+    "section1_title": "1. Acceptance of Terms",
+    "section1_text": "By accessing and using Linker, you agree to be bound by these Terms of Service. If you do not agree, do not use the platform.",
+    "section2_title": "2. Eligibility",
+    "section2_text": "Linker is available to students enrolled at UKIM and to registered companies. You must be at least 18 years old to create an account.",
+    "section3_title": "3. User Accounts",
+    "section3_text": "You are responsible for maintaining the confidentiality of your account credentials. You agree to provide accurate and complete information during registration.",
+    "section4_title": "4. Acceptable Use",
+    "section4_text": "You agree not to misuse the platform, including but not limited to: creating fake profiles, scraping data, harassing other users, or posting misleading listings.",
+    "section5_title": "5. Intellectual Property",
+    "section5_text": "All content and branding on Linker is the property of Linker or its licensors. You retain ownership of content you submit but grant Linker a license to display it on the platform.",
+    "section6_title": "6. Limitation of Liability",
+    "section6_text": "Linker is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the platform.",
+    "section7_title": "7. Changes to Terms",
+    "section7_text": "We reserve the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms."
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "last_updated": "Last updated: April 2026",
+    "section1_title": "1. Information We Collect",
+    "section1_text": "We collect information you provide during registration (name, email, university details) and usage data such as pages visited and actions taken.",
+    "section2_title": "2. How We Use Your Information",
+    "section2_text": "Your information is used to provide and improve the platform, match students with companies, verify student status, and communicate important updates.",
+    "section3_title": "3. Data Sharing",
+    "section3_text": "We do not sell your personal data. Company users may see anonymized student profiles. Your full profile is only revealed when you give explicit consent through an acknowledgment.",
+    "section4_title": "4. Data Storage and Security",
+    "section4_text": "Your data is stored securely using Supabase infrastructure with encryption at rest and in transit. We implement industry-standard security measures.",
+    "section5_title": "5. Your Rights",
+    "section5_text": "You have the right to access, correct, or delete your personal data at any time. Contact us to exercise these rights.",
+    "section6_title": "6. Cookies",
+    "section6_text": "We use essential session cookies to keep you signed in. No third-party tracking cookies are used.",
+    "section7_title": "7. Contact",
+    "section7_text": "For privacy-related inquiries, please contact us through the platform."
   }
 }

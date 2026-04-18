@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
+export const dynamic = "force-dynamic";
 
 const AVATAR_MAX_SIZE = 5 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set([

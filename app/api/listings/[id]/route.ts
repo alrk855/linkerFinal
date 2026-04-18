@@ -9,6 +9,8 @@ import {
 } from "@/lib/api/validate";
 import { getListingWithSkills, validateSkillIds } from "@/lib/supabase/queries";
 
+export const dynamic = "force-dynamic";
+
 type RouteParams = {
   params: {
     id: string;

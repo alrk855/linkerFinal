@@ -7,6 +7,8 @@ import {
 } from "@/lib/api/validate";
 import { enforceRateLimit } from "@/lib/api/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
     const { supabase, companyProfile } = await requireApprovedCompany(request);

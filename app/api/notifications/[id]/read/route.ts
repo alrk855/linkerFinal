@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { uuidSchema } from "@/lib/api/validate";
+export const dynamic = "force-dynamic";
 
 type RouteParams = {
   params: {

@@ -3,6 +3,7 @@ import { requireApprovedCompany } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
 import { parseQuery, discoverStudentsQuerySchema } from "@/lib/api/validate";
 import { getAnonymousStudentCard } from "@/lib/supabase/queries";
+export const dynamic = "force-dynamic";
 
 function computeSkillMatchScore(skillSlugs: string[], studentSkillSlugs: string[]): number {
   if (skillSlugs.length === 0) {

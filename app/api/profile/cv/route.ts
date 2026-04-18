@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth-guard";
 import { ApiError, withErrorHandling } from "@/lib/api/errors";
+export const dynamic = "force-dynamic";
 
 const CV_MAX_SIZE = 10 * 1024 * 1024;
 const CV_MIME_TYPE = "application/pdf";
