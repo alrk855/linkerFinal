@@ -63,7 +63,7 @@ function SignupFormContent() {
 
   const onSubmit = async (values: any) => {
     try {
-      const { confirmPassword, fullName, companyName, contactName, ...rest } = values;
+      const { confirmPassword, fullName, companyName, contactName, website, ...rest } = values;
       const payload: Record<string, unknown> = {
         ...rest,
         role,
@@ -71,6 +71,9 @@ function SignupFormContent() {
       };
       if (role === "company") {
         payload.company_name = companyName;
+        if (website && website.trim() !== "") {
+          payload.website = website;
+        }
       }
       const res = await fetch("/api/auth/signup", {
         method: "POST",
@@ -85,12 +88,12 @@ function SignupFormContent() {
       
       // Post-signup redirection
       if (role === "student") {
-        router.push("/auth/verify-student");
+        window.location.href = "/auth/verify-student";
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
-    } catch {
-      toast.error("Signup failed");
+    } catch (err: any) {
+      toast.error(err?.message || "Signup failed");
     }
   };
 
