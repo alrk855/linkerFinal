@@ -151,10 +151,10 @@ export default function ProfileEditPage() {
                 <h2 className="text-xl font-medium mb-6">Academic Details</h2>
                 <div className="space-y-6 max-w-2xl">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormItem>
-                      <FormLabel>University</FormLabel>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium leading-none">University</label>
                       <Input value="UKIM" disabled className="bg-surface-raised border-border text-foreground-muted" />
-                    </FormItem>
+                    </div>
                     <FormField control={form.control} name="faculty" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Faculty</FormLabel>

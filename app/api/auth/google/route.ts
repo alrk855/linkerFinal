@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const role = request.nextUrl.searchParams.get("role");
   const appOrigin = request.nextUrl.origin;
   const callbackUrl = new URL("/api/auth/callback", appOrigin);
+  callbackUrl.searchParams.set("provider", "google");
 
   const { supabase, finish } = createRedirectClient(request);
 

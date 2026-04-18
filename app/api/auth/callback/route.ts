@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
   const provider = (queryProvider || sessionProvider || "").toLowerCase();
   const state = parseOAuthState(request.nextUrl.searchParams.get("state"));
 
-  let redirectPath = "/dashboard";
+  let redirectPath = "/profile/edit";
 
   try {
     if (provider === "azure_ad" || provider === "azure") {
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
           is_verified_student: true,
           ukim_email: azureEmail,
         }).eq("id", targetUserId);
-        redirectPath = "/dashboard?verified=true";
+        redirectPath = "/profile/edit?verified=true";
       }
     } else if (provider === "google") {
       const svc = createServiceClient();
@@ -151,12 +151,12 @@ export async function GET(request: NextRequest) {
       const profile = existing || await getProfileById(svc, data.user.id).catch(() => null);
       redirectPath = (profile?.role === "student" && !profile.is_verified_student)
         ? "/auth/verify-student"
-        : "/dashboard";
+        : "/profile/edit";
     }
   } catch (e) {
     console.error("Post-exchange logic failed:", e);
-    // Session is still valid, just redirect to dashboard
-    redirectPath = "/dashboard";
+    // Session is still valid, so route to profile onboarding.
+    redirectPath = "/profile/edit";
   }
 
   return finish(

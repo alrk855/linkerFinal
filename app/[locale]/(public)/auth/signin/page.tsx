@@ -5,13 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const signInSchema = z.object({
   identifier: z.string().min(3, "Too short"),
@@ -21,7 +21,26 @@ const signInSchema = z.object({
 export default function SignInPage() {
   const t = useTranslations("Auth");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const oauthError = searchParams.get("error");
+  const oauthReason = searchParams.get("reason");
+
+  useEffect(() => {
+    if (!oauthError) return;
+
+    const fallbackMessage = "Sign-in failed. Please try again.";
+    const knownMessages: Record<string, string> = {
+      missing_code: "Sign-in callback was incomplete.",
+      exchange_exception: "OAuth session exchange failed.",
+      oauth_exchange_failed: "OAuth provider rejected the callback.",
+      oauth_init_failed: "Unable to start OAuth sign-in.",
+    };
+
+    const base = knownMessages[oauthError] || fallbackMessage;
+    const detail = oauthReason ? ` ${oauthReason}` : "";
+    toast.error(`${base}${detail}`.trim());
+  }, [oauthError, oauthReason]);
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -51,7 +70,7 @@ export default function SignInPage() {
       // Hard refresh to ensure cookies from the response are picked up
       // before navigating to the protected route
       router.refresh();
-      window.location.href = "/dashboard";
+      window.location.href = "/profile/edit";
     } catch (error) {
       toast.error("Failed to sign in. Please check your credentials.");
       console.error(error);

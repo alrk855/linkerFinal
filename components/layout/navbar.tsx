@@ -50,14 +50,33 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur border-b border-border w-full">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        
-        {/* Left: Logo */}
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-foreground font-bold text-xs">
-            L
-          </div>
-          <span className="font-medium">Linker</span>
-        </Link>
+        <div className="flex items-center gap-8 min-w-0">
+          {/* Left: Logo */}
+          <Link href="/dashboard" className="flex items-center gap-3 shrink-0">
+            <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-foreground font-bold text-xs">
+              L
+            </div>
+            <span className="font-medium">Linker</span>
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-4 text-sm min-w-0">
+            {visibleLinks.map((link) => {
+              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={isActive
+                    ? "text-foreground font-medium"
+                    : "text-foreground-muted hover:text-foreground transition-colors"
+                  }
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
         
         {/* Right side Desktop */}
         <div className="hidden sm:flex items-center gap-6">
