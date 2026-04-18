@@ -42,10 +42,15 @@ export default function SignInPage() {
         body: JSON.stringify(values),
       });
       
-      if (!res.ok) throw new Error("Invalid credentials");
-      
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error?.message || "Invalid credentials");
+      }
+
       toast.success("Signed in successfully.");
-      // Redirect to dashboard (hard route for now or context aware next query param)
+      // Hard refresh to ensure cookies from the response are picked up
+      // before navigating to the protected route
+      router.refresh();
       window.location.href = "/dashboard";
     } catch (error) {
       toast.error("Failed to sign in. Please check your credentials.");
