@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --surface: 0 0% 7%;
+    --surface-raised: 0 0% 10%;
+    
+    --border: 0 0% 14%;
+    --border-subtle: 0 0% 9%;
+    
+    --foreground: 0 0% 98%;
+    --foreground-muted: 0 0% 55%;
+    --foreground-faint: 0 0% 30%;
+    
+    --accent: 220 100% 60%;
+    --accent-hover: 220 100% 65%;
+    --accent-subtle: 220 100% 60% / 10%;
+    
+    --destructive: 0 72% 51%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --verified: 220 100% 60%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.shadow-custom-dropdown {
+  box-shadow: 0 0 0 1px hsl(var(--border)), 0 8px 32px rgba(0,0,0,0.4);
+}
