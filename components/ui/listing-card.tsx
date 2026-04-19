@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { mk } from "date-fns/locale";
 import { MapPin, Users, Zap } from "lucide-react";
 import Image from "next/image";
 
@@ -29,8 +30,25 @@ function normalizeSkills(listing: any): Array<{ id: string; name: string }> {
 function normalizeCompany(listing: any) {
   if (listing.company) return listing.company;
   const cp = listing.company_profiles;
-  if (!cp) return { company_name: "Company" };
+  if (!cp) return { company_name: "Компанија" };
   return Array.isArray(cp) ? cp[0] : cp;
+}
+
+function formatListingType(value?: string) {
+  const key = (value || "").toLowerCase();
+  if (key === "internship") return "Практикантство";
+  if (key === "part_time" || key === "part-time") return "Скратено работно време";
+  if (key === "full_time" || key === "full-time") return "Полно работно време";
+  return value || "-";
+}
+
+function formatExperience(value?: string) {
+  const key = (value || "").toLowerCase();
+  if (key === "no_experience") return "Без искуство";
+  if (key === "junior") return "Јуниор";
+  if (key === "mid") return "Средно";
+  if (key === "senior") return "Сениор";
+  return value || "-";
 }
 
 export function ListingCard({ listing, onClick, className }: ListingCardProps) {
@@ -71,14 +89,14 @@ export function ListingCard({ listing, onClick, className }: ListingCardProps) {
               {company.company_name}
             </span>
             <span className="text-xs text-foreground-muted truncate">
-              {listing.focus_area || "Software"}
+              {listing.focus_area || "Софтвер"}
             </span>
           </div>
         </div>
         <span className="text-xs text-foreground-faint whitespace-nowrap shrink-0 self-start mt-1">
           {listing.created_at
-            ? formatDistanceToNow(new Date(listing.created_at), { addSuffix: true })
-            : "Recently"}
+            ? formatDistanceToNow(new Date(listing.created_at), { addSuffix: true, locale: mk })
+            : "Неодамна"}
         </span>
       </div>
 
@@ -89,11 +107,11 @@ export function ListingCard({ listing, onClick, className }: ListingCardProps) {
         </h3>
         <div className="flex flex-wrap gap-2">
           <span className={cn("text-xs font-medium px-2.5 py-0.5 rounded-full border", typeStyle)}>
-            {listing.listing_type}
+            {formatListingType(listing.listing_type)}
           </span>
           {listing.experience_level && (
             <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-surface-raised border border-border text-foreground-muted">
-              {listing.experience_level}
+              {formatExperience(listing.experience_level)}
             </span>
           )}
         </div>
@@ -122,10 +140,10 @@ export function ListingCard({ listing, onClick, className }: ListingCardProps) {
       <div className="mt-2 pt-4 flex items-center justify-between border-t border-border-subtle relative">
         <div className="flex items-center gap-1.5 text-xs font-medium text-foreground-muted">
           <Zap size={14} className="text-accent" />
-          <span>{listing.slots_remaining ?? "?"} open positions</span>
+          <span>{listing.slots_remaining ?? "?"} слободни позиции</span>
         </div>
         <div className="text-xs font-semibold text-accent flex items-center gap-1 transition-transform duration-300 group-hover:translate-x-1">
-          View Details
+          Види детали
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
           </svg>

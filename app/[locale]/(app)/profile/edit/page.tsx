@@ -24,9 +24,9 @@ type SkillCategory = {
 };
 
 const profileSchema = z.object({
-  full_name: z.string().min(2, "Full name is required"),
+  full_name: z.string().min(2, "Задолжително е целосно име"),
   username: z.string(),
-  bio: z.string().max(200, "Bio max 200 characters").optional(),
+  bio: z.string().max(200, "Био максимум 200 карактери").optional(),
   phone: z.string().optional(),
   faculty: z.string().optional(),
   year_of_study: z.string().optional(),
@@ -47,26 +47,26 @@ const profileSchema = z.object({
 });
 
 const DEGREE_OPTIONS = [
-  { value: "bachelor", label: "Bachelor" },
-  { value: "master", label: "Master" },
+  { value: "bachelor", label: "Дипломски" },
+  { value: "master", label: "Магистерски" },
   { value: "phd", label: "PhD" },
 ];
 
 const EXPERIENCE_OPTIONS = [
-  { value: "no_experience", label: "No experience" },
-  { value: "junior", label: "Junior" },
-  { value: "mid", label: "Mid" },
-  { value: "senior", label: "Senior" },
+  { value: "no_experience", label: "Без искуство" },
+  { value: "junior", label: "Јуниор" },
+  { value: "mid", label: "Средно" },
+  { value: "senior", label: "Сениор" },
 ];
 
 const FOCUS_OPTIONS = [
-  { value: "frontend", label: "Frontend" },
-  { value: "backend", label: "Backend" },
-  { value: "fullstack", label: "Fullstack" },
-  { value: "mobile", label: "Mobile" },
+  { value: "frontend", label: "Фронтенд" },
+  { value: "backend", label: "Бекенд" },
+  { value: "fullstack", label: "Фулстек" },
+  { value: "mobile", label: "Мобилен развој" },
   { value: "devops", label: "DevOps" },
-  { value: "data", label: "Data" },
-  { value: "other", label: "Other" },
+  { value: "data", label: "Податоци" },
+  { value: "other", label: "Друго" },
 ];
 
 const SIZE_OPTIONS = ["1-10", "11-50", "51-200", "201-1000", "1000+"];
@@ -127,7 +127,7 @@ export default function ProfileEditPage() {
         setProfileLoading(true);
         const res = await fetch("/api/profile/me");
         if (!res.ok) {
-          throw new Error("Failed to load profile");
+          throw new Error("Неуспешно вчитување профил");
         }
 
         const data = await res.json();
@@ -165,7 +165,7 @@ export default function ProfileEditPage() {
             .filter(Boolean)
         );
       } catch {
-        toast.error("Failed to load profile.");
+        toast.error("Неуспешно вчитување профил.");
       } finally {
         setProfileLoading(false);
       }
@@ -176,12 +176,12 @@ export default function ProfileEditPage() {
         setSkillsLoading(true);
         const res = await fetch("/api/skills");
         if (!res.ok) {
-          throw new Error("Failed to load skills");
+          throw new Error("Неуспешно вчитување вештини");
         }
         const data = await res.json();
         setSkillCategories(Array.isArray(data.categories) ? data.categories : []);
       } catch {
-        toast.error("Failed to load skills catalog.");
+        toast.error("Неуспешно вчитување каталог на вештини.");
       } finally {
         setSkillsLoading(false);
       }
@@ -204,7 +204,7 @@ export default function ProfileEditPage() {
       }
 
       if (prev.length >= 20) {
-        toast.error("You can select up to 20 skills.");
+        toast.error("Може да изберете најмногу 20 вештини.");
         return prev;
       }
 
@@ -251,13 +251,13 @@ export default function ProfileEditPage() {
 
       if (!profileRes.ok) {
         const body = await profileRes.json().catch(() => null);
-        throw new Error(body?.error?.message || "Failed to save profile.");
+        throw new Error(body?.error?.message || "Неуспешно зачувување профил.");
       }
       profileSaved = true;
 
       if (isStudent) {
         if (!user?.is_verified_student) {
-          toast.info("Profile saved. Verify your student account to manage skills.");
+          toast.info("Профилот е зачуван. Верификувајте студентска сметка за управување со вештини.");
         } else {
           const skillsRes = await fetch("/api/profile/skills", {
             method: "POST",
@@ -267,17 +267,17 @@ export default function ProfileEditPage() {
 
           if (!skillsRes.ok) {
             const body = await skillsRes.json().catch(() => null);
-            throw new Error(body?.error?.message || "Failed to save skills.");
+            throw new Error(body?.error?.message || "Неуспешно зачувување вештини.");
           }
         }
       }
 
-      toast.success("Profile saved successfully.");
+      toast.success("Профилот е успешно зачуван.");
     } catch (error: any) {
       if (profileSaved) {
-        toast.error("Profile details were saved, but one part failed to sync.");
+        toast.error("Деталите за профилот се зачувани, но еден дел не се синхронизираше.");
       }
-      toast.error(error?.message || "Failed to save profile.");
+      toast.error(error?.message || "Неуспешно зачувување профил.");
     } finally {
       setSaving(false);
     }
@@ -300,16 +300,16 @@ export default function ProfileEditPage() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 pb-24">
-        <PageHeader title="Edit Profile" description="Update your information here." className="pt-0 mt-0" />
+        <PageHeader title="Уреди профил" description="Ажурирајте ги вашите информации." className="pt-0 mt-0" />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className={activeSection === "basic" ? "block" : "hidden"}>
-              <h2 className="text-xl font-medium mb-6">Basic Information</h2>
+              <h2 className="text-xl font-medium mb-6">Основни информации</h2>
               <div className="space-y-4 max-w-2xl">
                 <FormField control={form.control} name="full_name" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full name</FormLabel>
+                    <FormLabel>Целосно име</FormLabel>
                     <FormControl><Input {...field} className="bg-background border-border" /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -317,9 +317,9 @@ export default function ProfileEditPage() {
 
                 <FormField control={form.control} name="username" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Корисничко име</FormLabel>
                     <FormControl><Input {...field} disabled className="bg-surface-raised border-border text-foreground-muted" /></FormControl>
-                    <p className="text-xs text-foreground-faint">Username is managed by the system.</p>
+                    <p className="text-xs text-foreground-faint">Корисничкото име е управувано од системот.</p>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -327,11 +327,11 @@ export default function ProfileEditPage() {
                 <FormField control={form.control} name="bio" render={({ field }) => (
                   <FormItem>
                     <div className="flex justify-between items-center mb-1">
-                      <FormLabel className="m-0">Bio</FormLabel>
+                      <FormLabel className="m-0">Био</FormLabel>
                       <span className="text-xs text-foreground-faint">{field.value?.length || 0} / 200</span>
                     </div>
                     <FormControl>
-                      <Textarea {...field} className="bg-background border-border resize-none h-24" placeholder="Tell us a bit about yourself..." />
+                      <Textarea {...field} className="bg-background border-border resize-none h-24" placeholder="Кажете ни нешто за вас..." />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -339,7 +339,7 @@ export default function ProfileEditPage() {
 
                 <FormField control={form.control} name="phone" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone number</FormLabel>
+                    <FormLabel>Телефонски број</FormLabel>
                     <FormControl><Input {...field} type="tel" className="bg-background border-border" placeholder="+389..." /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -349,12 +349,12 @@ export default function ProfileEditPage() {
 
             {isStudent && (
               <div className={activeSection === "academic" ? "block" : "hidden"}>
-                <h2 className="text-xl font-medium mb-6">Academic Details</h2>
+                <h2 className="text-xl font-medium mb-6">Академски детали</h2>
                 <div className="space-y-4 max-w-2xl">
                   <FormField control={form.control} name="faculty" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Faculty</FormLabel>
-                      <FormControl><Input {...field} className="bg-background border-border" placeholder="FCSE / FEEIT / PMF" /></FormControl>
+                      <FormLabel>Факултет</FormLabel>
+                      <FormControl><Input {...field} className="bg-background border-border" placeholder="ФИНКИ / ФЕИТ / ПМФ" /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -362,7 +362,7 @@ export default function ProfileEditPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField control={form.control} name="year_of_study" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Year of study</FormLabel>
+                        <FormLabel>Година на студии</FormLabel>
                         <FormControl><Input {...field} type="number" min={1} max={7} className="bg-background border-border" /></FormControl>
                         <FormMessage />
                       </FormItem>
@@ -370,7 +370,7 @@ export default function ProfileEditPage() {
 
                     <FormField control={form.control} name="graduation_year" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Graduation year</FormLabel>
+                        <FormLabel>Година на дипломирање</FormLabel>
                         <FormControl><Input {...field} type="number" min={2000} max={2100} className="bg-background border-border" /></FormControl>
                         <FormMessage />
                       </FormItem>
@@ -380,10 +380,10 @@ export default function ProfileEditPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField control={form.control} name="degree_type" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Degree type</FormLabel>
+                        <FormLabel>Тип на студии</FormLabel>
                         <Select value={field.value || ""} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Избери" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {DEGREE_OPTIONS.map((option) => (
@@ -397,10 +397,10 @@ export default function ProfileEditPage() {
 
                     <FormField control={form.control} name="experience_level" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Experience</FormLabel>
+                        <FormLabel>Искуство</FormLabel>
                         <Select value={field.value || ""} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Избери" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {EXPERIENCE_OPTIONS.map((option) => (
@@ -414,10 +414,10 @@ export default function ProfileEditPage() {
 
                     <FormField control={form.control} name="focus_area" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Focus</FormLabel>
+                        <FormLabel>Област</FormLabel>
                         <Select value={field.value || ""} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Избери" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {FOCUS_OPTIONS.map((option) => (
@@ -436,16 +436,16 @@ export default function ProfileEditPage() {
             {isStudent && (
               <div className={activeSection === "skills" ? "block" : "hidden"}>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-medium">Skills</h2>
-                  <span className="text-sm text-foreground-muted">{selectedSkillCount} / 20 selected</span>
+                  <h2 className="text-xl font-medium">Вештини</h2>
+                  <span className="text-sm text-foreground-muted">{selectedSkillCount} / 20 избрани</span>
                 </div>
 
                 {!user.is_verified_student ? (
                   <div className="max-w-2xl rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm text-foreground">
-                    Verify your student account with Microsoft to enable skill updates.
+                    Верификувајте ја студентската сметка со Microsoft за ажурирање вештини.
                     <div className="mt-3">
                       <Button type="button" variant="outline" className="bg-background border-border" onClick={() => { window.location.href = "/auth/verify-student"; }}>
-                        Connect Microsoft Account
+                        Поврзи Microsoft сметка
                       </Button>
                     </div>
                   </div>
@@ -473,11 +473,11 @@ export default function ProfileEditPage() {
 
             {!isStudent && (
               <div className={activeSection === "company" ? "block" : "hidden"}>
-                <h2 className="text-xl font-medium mb-6">Company Information</h2>
+                <h2 className="text-xl font-medium mb-6">Информации за компанија</h2>
                 <div className="space-y-4 max-w-2xl">
                   <FormField control={form.control} name="company_name" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company name</FormLabel>
+                      <FormLabel>Име на компанија</FormLabel>
                       <FormControl><Input {...field} className="bg-background border-border" /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -485,7 +485,7 @@ export default function ProfileEditPage() {
 
                   <FormField control={form.control} name="company_description" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Опис</FormLabel>
                       <FormControl><Textarea {...field} className="bg-background border-border h-32 resize-none" /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -493,7 +493,7 @@ export default function ProfileEditPage() {
 
                   <FormField control={form.control} name="industry" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Industry</FormLabel>
+                      <FormLabel>Индустрија</FormLabel>
                       <FormControl><Input {...field} className="bg-background border-border" /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -502,10 +502,10 @@ export default function ProfileEditPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField control={form.control} name="size_range" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company size</FormLabel>
+                        <FormLabel>Големина на компанија</FormLabel>
                         <Select value={field.value || ""} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Избери" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {SIZE_OPTIONS.map((option) => (
@@ -519,7 +519,7 @@ export default function ProfileEditPage() {
 
                     <FormField control={form.control} name="location" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location</FormLabel>
+                        <FormLabel>Локација</FormLabel>
                         <FormControl><Input {...field} className="bg-background border-border" /></FormControl>
                         <FormMessage />
                       </FormItem>
@@ -528,7 +528,7 @@ export default function ProfileEditPage() {
 
                   <FormField control={form.control} name="company_website" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company website</FormLabel>
+                      <FormLabel>Веб-страница на компанија</FormLabel>
                       <FormControl><Input {...field} className="bg-background border-border" placeholder="https://" /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -538,7 +538,7 @@ export default function ProfileEditPage() {
             )}
 
             <div className={activeSection === "links" ? "block" : "hidden"}>
-              <h2 className="text-xl font-medium mb-6">External Links</h2>
+              <h2 className="text-xl font-medium mb-6">Надворешни линкови</h2>
               <div className="space-y-4 max-w-2xl">
                 <FormField control={form.control} name="github_url" render={({ field }) => (
                   <FormItem>
@@ -556,14 +556,14 @@ export default function ProfileEditPage() {
                 )} />
                 <FormField control={form.control} name="portfolio_url" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Portfolio</FormLabel>
+                    <FormLabel>Портфолио</FormLabel>
                     <FormControl><Input {...field} className="bg-background border-border" placeholder="https://..." /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="website_url" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Personal website</FormLabel>
+                    <FormLabel>Лична веб-страница</FormLabel>
                     <FormControl><Input {...field} className="bg-background border-border" placeholder="https://..." /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -573,9 +573,9 @@ export default function ProfileEditPage() {
 
             {isStudent && (
               <div className={activeSection === "documents" ? "block" : "hidden"}>
-                <h2 className="text-xl font-medium mb-6">Documents</h2>
+                <h2 className="text-xl font-medium mb-6">Документи</h2>
                 <div className="max-w-2xl rounded-xl border border-border bg-surface p-6 text-sm text-foreground-muted">
-                  CV upload is managed separately and will appear here.
+                  Прикачувањето CV се управува одделно и ќе се појави тука.
                 </div>
               </div>
             )}
@@ -583,10 +583,10 @@ export default function ProfileEditPage() {
             <div className="fixed bottom-0 right-0 left-0 lg:left-80 p-4 bg-background/90 backdrop-blur border-t border-border z-20 flex justify-end px-4 lg:px-12">
               <div className="w-full max-w-2xl flex justify-end gap-3">
                 <Button type="button" variant="outline" className="bg-surface hover:bg-surface-raised border-border" onClick={() => window.history.back()}>
-                  Cancel
+                  Откажи
                 </Button>
                 <Button type="submit" disabled={saving} className="bg-accent hover:bg-accent-hover text-background font-medium px-8">
-                  {saving ? "Saving..." : "Save Profile"}
+                  {saving ? "Се зачувува..." : "Зачувај профил"}
                 </Button>
               </div>
             </div>

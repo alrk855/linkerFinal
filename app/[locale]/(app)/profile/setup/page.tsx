@@ -17,7 +17,7 @@ import { CheckCircle2, ArrowRight, Sparkles, GraduationCap, Building2 } from "lu
 import { cn } from "@/lib/utils";
 
 const studentSchema = z.object({
-  full_name: z.string().min(2, "Full name required"),
+  full_name: z.string().min(2, "Задолжително е целосно име"),
   bio: z.string().max(200).optional(),
   faculty: z.string().optional(),
   degree_type: z.enum(["bachelor", "master", "phd"]).optional(),
@@ -30,8 +30,8 @@ const studentSchema = z.object({
 });
 
 const companySchema = z.object({
-  full_name: z.string().min(2, "Contact name required"),
-  company_name: z.string().min(2, "Company name required"),
+  full_name: z.string().min(2, "Задолжително е име на контакт"),
+  company_name: z.string().min(2, "Задолжително е име на компанија"),
   company_description: z.string().max(400).optional(),
   industry: z.string().optional(),
   size_range: z.enum(["1-10", "11-50", "51-200", "201-1000", "1000+"]).optional(),
@@ -39,8 +39,8 @@ const companySchema = z.object({
   company_website: z.string().url().optional().or(z.literal("")),
 });
 
-const STUDENT_STEPS = ["Welcome", "Academic", "Focus & Skills", "Links"];
-const COMPANY_STEPS = ["Welcome", "Company Info", "Presence"];
+const STUDENT_STEPS = ["Добредојде", "Академски", "Област и вештини", "Линкови"];
+const COMPANY_STEPS = ["Добредојде", "Инфо за компанија", "Присуство"];
 
 function asOptionalString(value?: string) {
   const trimmed = (value || "").trim();
@@ -126,11 +126,11 @@ export default function ProfileSetupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to save");
-      toast.success("Profile saved! Welcome to Linker.");
+      if (!res.ok) throw new Error("Неуспешно зачувување");
+      toast.success("Профилот е зачуван! Добредојдовте на Linker.");
       router.push("/dashboard");
     } catch {
-      toast.error("Could not save profile. You can update it later.");
+      toast.error("Профилот не може да се зачува. Може да ажурирате подоцна.");
       router.push("/dashboard");
     } finally {
       setSaving(false);
@@ -155,18 +155,18 @@ export default function ProfileSetupPage() {
         {verified && (
           <div className="inline-flex items-center gap-2 text-success bg-success/10 border border-success/20 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <CheckCircle2 size={16} />
-            Student identity verified!
+            Студентскиот идентитет е верификуван!
           </div>
         )}
         <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-2">
-          {step === 0 ? "Welcome to Linker" : `Set up your ${isStudent ? "student" : "company"} profile`}
+          {step === 0 ? "Добредојдовте на Linker" : `Поставете го вашиот ${isStudent ? "студентски" : "компаниски"} профил`}
         </h1>
         <p className="text-foreground-muted">
           {step === 0
             ? isStudent
-              ? "Let's get your profile ready so companies can discover you."
-              : "Complete your company profile while we review your account."
-            : "This takes about 2 minutes. You can always edit later."}
+              ? "Да го подготвиме профилот за компаниите лесно да ве откријат."
+              : "Пополнете го компанискиот профил додека ја прегледуваме сметката."
+            : "Потребни се околу 2 минути. Секогаш можете да уредите подоцна."}
         </p>
       </div>
 
@@ -212,9 +212,9 @@ export default function ProfileSetupPage() {
                 </div>
                 {isStudent && !user.is_verified_student && (
                   <div className="rounded-xl border border-accent/30 bg-accent/5 p-4">
-                    <p className="text-sm font-medium text-foreground">Verify with Microsoft to unlock applications</p>
+                    <p className="text-sm font-medium text-foreground">Верификувајте со Microsoft за отклучување апликации</p>
                     <p className="text-xs text-foreground-muted mt-1">
-                      Connect your UKIM Microsoft account now or finish setup and verify later from account settings.
+                      Поврзете UKIM Microsoft сметка сега или завршете ја поставката и верификувајте подоцна од поставките.
                     </p>
                     <Button
                       type="button"
@@ -224,15 +224,15 @@ export default function ProfileSetupPage() {
                         window.location.href = "/auth/verify-student";
                       }}
                     >
-                      Verify with Microsoft
+                      Верификувај со Microsoft
                     </Button>
                   </div>
                 )}
                 <FormField control={form.control} name="full_name" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your name</FormLabel>
+                    <FormLabel>Вашето име</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Full name" className="bg-background border-border h-11" />
+                      <Input {...field} placeholder="Целосно име" className="bg-background border-border h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -240,15 +240,15 @@ export default function ProfileSetupPage() {
                 <FormField control={form.control} name="bio" render={({ field }) => (
                   <FormItem>
                     <div className="flex justify-between items-center mb-1">
-                      <FormLabel className="m-0">Short bio</FormLabel>
+                      <FormLabel className="m-0">Кратко био</FormLabel>
                       <span className="text-xs text-foreground-faint">{field.value?.length || 0} / 200</span>
                     </div>
                     <FormControl>
                       <Textarea
                         {...field}
                         placeholder={isStudent
-                          ? "e.g. 3rd year FINKI student passionate about frontend development..."
-                          : "e.g. We build tools for developers. Based in Skopje."
+                          ? "пр. студент на ФИНКИ трета година, заинтересиран за фронтенд развој..."
+                          : "пр. Градиме алатки за програмери. Седиште во Скопје."
                         }
                         className="bg-background border-border resize-none h-24"
                       />
@@ -265,34 +265,34 @@ export default function ProfileSetupPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField control={form.control} name="faculty" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Faculty</FormLabel>
+                      <FormLabel>Факултет</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-background border-border">
-                            <SelectValue placeholder="Select" />
+                            <SelectValue placeholder="Избери" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="FINKI">FINKI</SelectItem>
                           <SelectItem value="FEIT">FEIT</SelectItem>
                           <SelectItem value="FCSE">FCSE</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="Other">Друго</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="year_of_study" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Year</FormLabel>
+                      <FormLabel>Година</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-background border-border">
-                            <SelectValue placeholder="Year" />
+                            <SelectValue placeholder="Година" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {["1", "2", "3", "4", "5"].map(y => (
-                            <SelectItem key={y} value={y}>Year {y}</SelectItem>
+                            <SelectItem key={y} value={y}>Година {y}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -302,12 +302,12 @@ export default function ProfileSetupPage() {
 
                 <FormField control={form.control} name="degree_type" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Degree type</FormLabel>
+                    <FormLabel>Тип на студии</FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-3">
                         {[
-                          { val: "bachelor", label: "Bachelor" },
-                          { val: "master", label: "Master" },
+                          { val: "bachelor", label: "Дипломски" },
+                          { val: "master", label: "Магистерски" },
                         ].map(d => (
                           <FormItem key={d.val} className="flex items-center gap-2 space-y-0 flex-1 bg-background border border-border px-4 py-3 rounded-lg cursor-pointer">
                             <FormControl><RadioGroupItem value={d.val} /></FormControl>
@@ -326,21 +326,21 @@ export default function ProfileSetupPage() {
               <div className="space-y-5">
                 <FormField control={form.control} name="focus_area" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Primary focus area</FormLabel>
+                    <FormLabel>Примарна област</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="bg-background border-border">
-                          <SelectValue placeholder="Select your focus" />
+                          <SelectValue placeholder="Избери област" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="frontend">Frontend</SelectItem>
-                        <SelectItem value="backend">Backend</SelectItem>
-                        <SelectItem value="fullstack">Fullstack</SelectItem>
-                        <SelectItem value="mobile">Mobile</SelectItem>
+                        <SelectItem value="frontend">Фронтенд</SelectItem>
+                        <SelectItem value="backend">Бекенд</SelectItem>
+                        <SelectItem value="fullstack">Фулстек</SelectItem>
+                        <SelectItem value="mobile">Мобилен развој</SelectItem>
                         <SelectItem value="devops">DevOps</SelectItem>
-                        <SelectItem value="data">Data</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="data">Податоци</SelectItem>
+                        <SelectItem value="other">Друго</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -348,14 +348,14 @@ export default function ProfileSetupPage() {
 
                 <FormField control={form.control} name="experience_level" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Experience level</FormLabel>
+                    <FormLabel>Ниво на искуство</FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="grid grid-cols-2 gap-3">
                         {[
-                          { val: "no_experience", label: "No experience", desc: "Looking for first role" },
-                          { val: "junior", label: "Junior", desc: "0–2 years" },
-                          { val: "mid", label: "Mid-level", desc: "2-4 years" },
-                          { val: "senior", label: "Senior", desc: "4+ years" },
+                          { val: "no_experience", label: "Без искуство", desc: "Барам прва улога" },
+                          { val: "junior", label: "Јуниор", desc: "0-2 години" },
+                          { val: "mid", label: "Средно", desc: "2-4 години" },
+                          { val: "senior", label: "Сениор", desc: "4+ години" },
                         ].map(lvl => (
                           <FormItem key={lvl.val} className="flex flex-col items-start space-y-0 bg-background border border-border p-4 rounded-lg cursor-pointer group">
                             <div className="flex items-center gap-2 mb-1">
@@ -375,11 +375,11 @@ export default function ProfileSetupPage() {
             {/* ── STEP 3 (Student): Links ── */}
             {isStudent && step === 3 && (
               <div className="space-y-4">
-                <p className="text-sm text-foreground-muted">Add your profiles so companies can learn more about you (optional).</p>
+                <p className="text-sm text-foreground-muted">Додајте профили за компаниите подобро да ве запознаат (опционално).</p>
                 {[
                   { name: "github_url", label: "GitHub", placeholder: "https://github.com/you" },
                   { name: "linkedin_url", label: "LinkedIn", placeholder: "https://linkedin.com/in/you" },
-                  { name: "portfolio_url", label: "Portfolio", placeholder: "https://yoursite.com" },
+                  { name: "portfolio_url", label: "Портфолио", placeholder: "https://your-site.com" },
                 ].map(link => (
                   <FormField key={link.name} control={form.control} name={link.name as any} render={({ field }) => (
                     <FormItem>
@@ -399,16 +399,16 @@ export default function ProfileSetupPage() {
               <div className="space-y-4">
                 <FormField control={form.control} name="company_name" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company name</FormLabel>
+                    <FormLabel>Име на компанија</FormLabel>
                     <FormControl><Input {...field} className="bg-background border-border h-11" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="company_description" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>What does your company do?</FormLabel>
+                    <FormLabel>Со што се занимава вашата компанија?</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="Brief description..." className="bg-background border-border h-28 resize-none" />
+                      <Textarea {...field} placeholder="Краток опис..." className="bg-background border-border h-28 resize-none" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -416,14 +416,22 @@ export default function ProfileSetupPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField control={form.control} name="industry" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Industry</FormLabel>
+                      <FormLabel>Индустрија</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select" /></SelectTrigger>
+                          <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Избери" /></SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {["Technology", "Finance", "Healthcare", "Education", "Retail", "Media", "Other"].map(i => (
-                            <SelectItem key={i} value={i.toLowerCase()}>{i}</SelectItem>
+                          {[
+                            { value: "technology", label: "Технологија" },
+                            { value: "finance", label: "Финансии" },
+                            { value: "healthcare", label: "Здравство" },
+                            { value: "education", label: "Образование" },
+                            { value: "retail", label: "Трговија" },
+                            { value: "media", label: "Медиуми" },
+                            { value: "other", label: "Друго" },
+                          ].map((i) => (
+                            <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -431,17 +439,17 @@ export default function ProfileSetupPage() {
                   )} />
                   <FormField control={form.control} name="size_range" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company size</FormLabel>
+                      <FormLabel>Големина на компанија</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Size" /></SelectTrigger>
+                          <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Големина" /></SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="1-10">1-10 employees</SelectItem>
-                          <SelectItem value="11-50">11-50 employees</SelectItem>
-                          <SelectItem value="51-200">51-200 employees</SelectItem>
-                          <SelectItem value="201-1000">201-1000 employees</SelectItem>
-                          <SelectItem value="1000+">1000+ employees</SelectItem>
+                          <SelectItem value="1-10">1-10 вработени</SelectItem>
+                          <SelectItem value="11-50">11-50 вработени</SelectItem>
+                          <SelectItem value="51-200">51-200 вработени</SelectItem>
+                          <SelectItem value="201-1000">201-1000 вработени</SelectItem>
+                          <SelectItem value="1000+">1000+ вработени</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -449,9 +457,9 @@ export default function ProfileSetupPage() {
                 </div>
                 <FormField control={form.control} name="location" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Локација</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g. Skopje, Hybrid" className="bg-background border-border" />
+                      <Input {...field} placeholder="пр. Скопје, Хибридно" className="bg-background border-border" />
                     </FormControl>
                   </FormItem>
                 )} />
@@ -461,10 +469,10 @@ export default function ProfileSetupPage() {
             {/* ── STEP 2 (Company): Links ── */}
             {!isStudent && step === 2 && (
               <div className="space-y-4">
-                <p className="text-sm text-foreground-muted">Help students learn about your company.</p>
+                <p className="text-sm text-foreground-muted">Помогнете им на студентите да дознаат повеќе за вашата компанија.</p>
                 <FormField control={form.control} name="company_website" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company website</FormLabel>
+                    <FormLabel>Веб-страница на компанија</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="https://yourcompany.com" className="bg-background border-border" />
                     </FormControl>
@@ -483,7 +491,7 @@ export default function ProfileSetupPage() {
               onClick={() => router.push("/dashboard")}
               className="text-sm text-foreground-muted hover:text-foreground underline underline-offset-4"
             >
-              Skip for now
+              Прескокни засега
             </button>
             <div className="flex gap-3">
               {step > 0 && (
@@ -493,7 +501,7 @@ export default function ProfileSetupPage() {
                   onClick={() => setStep(s => s - 1)}
                   className="bg-surface border-border"
                 >
-                  Back
+                  Назад
                 </Button>
               )}
               {isLast ? (
@@ -503,7 +511,7 @@ export default function ProfileSetupPage() {
                   className="bg-accent hover:bg-accent-hover text-white font-medium px-8 gap-2"
                 >
                   <Sparkles size={16} />
-                  {saving ? "Saving..." : "Finish setup"}
+                  {saving ? "Се зачувува..." : "Заврши поставка"}
                 </Button>
               ) : (
                 <Button
@@ -511,7 +519,7 @@ export default function ProfileSetupPage() {
                   onClick={next}
                   className="bg-accent hover:bg-accent-hover text-white font-medium px-8 gap-2"
                 >
-                  Continue <ArrowRight size={16} />
+                  Продолжи <ArrowRight size={16} />
                 </Button>
               )}
             </div>

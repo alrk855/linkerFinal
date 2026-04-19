@@ -20,7 +20,7 @@ export default async function LocaleLayout({
   return (
     <html lang="mk" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="font-sans antialiased min-h-screen flex flex-col relative">
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale="mk" messages={messages}>
           {children}
         </NextIntlClientProvider>
         <Toaster theme="light" richColors position="top-right" />

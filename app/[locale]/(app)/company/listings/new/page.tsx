@@ -13,12 +13,12 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const listingSchema = z.object({
-  title: z.string().min(5, "Title is too short").max(100, "Title is too long"),
-  description: z.string().min(50, "Please provide a detailed description (min 50 chars)"),
+  title: z.string().min(5, "Насловот е премногу краток").max(100, "Насловот е премногу долг"),
+  description: z.string().min(50, "Внесете подетален опис (минимум 50 карактери)"),
   listing_type: z.enum(["internship", "part_time", "full_time"]),
-  focus_area: z.string().min(1, "Select a focus area"),
+  focus_area: z.string().min(1, "Изберете област"),
   experience_level: z.enum(["no_experience", "junior", "mid", "senior"]),
-  total_slots: z.coerce.number().min(1, "Must have at least 1 slot").max(20, "Maximum 20 slots"),
+  total_slots: z.coerce.number().min(1, "Мора да има најмалку 1 слот").max(20, "Максимум 20 слотови"),
 });
 
 export default function NewListingPage() {
@@ -45,12 +45,12 @@ export default function NewListingPage() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error?.message || "Failed to publish listing");
+        throw new Error(body?.error?.message || "Неуспешно објавување оглас");
       }
-      toast.success("Listing published successfully.");
+      toast.success("Огласот е успешно објавен.");
       router.push("/company/listings");
     } catch (err: any) {
-      toast.error(err?.message || "Failed to publish listing.");
+      toast.error(err?.message || "Неуспешно објавување оглас.");
     }
   };
 
@@ -58,9 +58,9 @@ export default function NewListingPage() {
     <div className="flex-1 w-full max-w-2xl mx-auto px-4 py-8 md:py-12">
       <Card className="bg-surface border-border shadow-card rounded-xl">
         <CardHeader className="border-b border-border pb-6">
-          <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">Post a New Listing</CardTitle>
+          <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">Објави нов оглас</CardTitle>
           <CardDescription className="text-foreground-muted">
-            Create a detailed listing to discover matched candidates.
+            Креирајте детален оглас за да пронајдете соодветни кандидати.
           </CardDescription>
         </CardHeader>
 
@@ -72,9 +72,9 @@ export default function NewListingPage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Title</FormLabel>
+                    <FormLabel>Наслов на позиција</FormLabel>
                     <FormControl>
-                      <Input {...field} className="bg-background border-border" placeholder="e.g. Frontend Engineering Intern" />
+                      <Input {...field} className="bg-background border-border" placeholder="пр. Практикант за фронтенд развој" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -86,12 +86,12 @@ export default function NewListingPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Опис</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         className="bg-background border-border h-48 resize-none"
-                        placeholder="Describe responsibilities, requirements, what you are looking for..."
+                        placeholder="Опишете одговорности, барања и што барате..."
                       />
                     </FormControl>
                     <FormMessage />
@@ -105,13 +105,13 @@ export default function NewListingPage() {
                   name="listing_type"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel>Role Type</FormLabel>
+                      <FormLabel>Тип на позиција</FormLabel>
                       <FormControl>
                         <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col gap-3">
                           {[
-                            { value: "internship", label: "Internship" },
-                            { value: "part_time", label: "Part-time" },
-                            { value: "full_time", label: "Full-time" },
+                            { value: "internship", label: "Практикантство" },
+                            { value: "part_time", label: "Скратено работно време" },
+                            { value: "full_time", label: "Полно работно време" },
                           ].map((t) => (
                             <FormItem
                               key={t.value}
@@ -133,14 +133,14 @@ export default function NewListingPage() {
                   name="experience_level"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel>Experience Level</FormLabel>
+                      <FormLabel>Ниво на искуство</FormLabel>
                       <FormControl>
                         <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col gap-3">
                           {[
-                            { value: "no_experience", label: "No experience" },
-                            { value: "junior", label: "Junior" },
-                            { value: "mid", label: "Mid-level" },
-                            { value: "senior", label: "Senior" },
+                            { value: "no_experience", label: "Без искуство" },
+                            { value: "junior", label: "Јуниор" },
+                            { value: "mid", label: "Средно ниво" },
+                            { value: "senior", label: "Сениор" },
                           ].map((t) => (
                             <FormItem
                               key={t.value}
@@ -164,21 +164,21 @@ export default function NewListingPage() {
                   name="focus_area"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Focus Area</FormLabel>
+                      <FormLabel>Област</FormLabel>
                       <FormControl>
                         <select
                           {...field}
                           className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
                         >
-                          <option value="" disabled>Select area</option>
+                          <option value="" disabled>Избери област</option>
                           {[
-                            { value: "frontend", label: "Frontend" },
-                            { value: "backend", label: "Backend" },
-                            { value: "fullstack", label: "Fullstack" },
-                            { value: "mobile", label: "Mobile" },
+                            { value: "frontend", label: "Фронтенд" },
+                            { value: "backend", label: "Бекенд" },
+                            { value: "fullstack", label: "Фулстек" },
+                            { value: "mobile", label: "Мобилен развој" },
                             { value: "devops", label: "DevOps" },
-                            { value: "data", label: "Data" },
-                            { value: "other", label: "Other" },
+                            { value: "data", label: "Податоци" },
+                            { value: "other", label: "Друго" },
                           ].map((a) => (
                             <option key={a.value} value={a.value}>{a.label}</option>
                           ))}
@@ -194,12 +194,12 @@ export default function NewListingPage() {
                   name="total_slots"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Positions Available</FormLabel>
+                      <FormLabel>Достапни позиции</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" max="20" {...field} className="bg-background border-border w-24" />
                       </FormControl>
                       <p className="text-xs text-foreground-muted mt-1">
-                        Max candidates you can acknowledge for this role.
+                        Максимален број кандидати што можете да ги потврдите за оваа улога.
                       </p>
                       <FormMessage />
                     </FormItem>
@@ -214,14 +214,14 @@ export default function NewListingPage() {
                   className="bg-surface hover:bg-surface-raised border-border"
                   onClick={() => router.back()}
                 >
-                  Cancel
+                  Откажи
                 </Button>
                 <Button
                   type="submit"
                   className="bg-accent hover:bg-accent-hover text-white px-8 font-medium"
                   disabled={form.formState.isSubmitting}
                 >
-                  {form.formState.isSubmitting ? "Publishing..." : "Post Listing"}
+                  {form.formState.isSubmitting ? "Се објавува..." : "Објави оглас"}
                 </Button>
               </div>
             </form>

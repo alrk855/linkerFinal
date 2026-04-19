@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Bell, Briefcase, FileCheck, CheckCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { mk } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -31,22 +32,22 @@ export default function NotificationsPage() {
     await fetch("/api/notifications/read-all", { method: "PATCH" });
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     setUnreadCount(0);
-    toast.success("All notifications marked as read.");
+    toast.success("Сите известувања се означени како прочитани.");
   };
 
   return (
     <div className="flex-1 w-full max-w-3xl mx-auto px-4 lg:px-8 py-8 flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Notifications</h1>
-          <p className="text-foreground-muted text-sm mt-0.5">Updates from the platform and companies.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Известувања</h1>
+          <p className="text-foreground-muted text-sm mt-0.5">Ажурирања од платформата и компаниите.</p>
         </div>
         {unreadCount > 0 && (
           <button
             onClick={markAllRead}
             className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
           >
-            <CheckCheck size={16} /> Mark all read
+            <CheckCheck size={16} /> Означи сe како прочитано
           </button>
         )}
       </div>
@@ -67,7 +68,7 @@ export default function NotificationsPage() {
         ) : notifications.length === 0 ? (
           <div className="p-12 text-center">
             <Bell size={32} className="text-foreground-faint mx-auto mb-3" />
-            <p className="text-foreground-muted">No notifications yet.</p>
+            <p className="text-foreground-muted">Се уште нема известувања.</p>
           </div>
         ) : (
           <div className="divide-y divide-border">
@@ -91,11 +92,11 @@ export default function NotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm font-semibold text-foreground">{n.title || "Notification"}</p>
+                      <p className="text-sm font-semibold text-foreground">{n.title || "Известување"}</p>
                       <p className="text-sm text-foreground-muted mt-0.5 leading-relaxed">{n.message}</p>
                     </div>
                     <span className="text-xs text-foreground-faint whitespace-nowrap shrink-0">
-                      {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : ""}
+                      {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: mk }) : ""}
                     </span>
                   </div>
                 </div>

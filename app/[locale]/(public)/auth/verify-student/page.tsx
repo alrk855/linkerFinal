@@ -19,11 +19,11 @@ function VerifyStudentContent() {
   useEffect(() => {
     const error = searchParams.get("error");
     if (error === "azure_email_failed") {
-      toast.error("Microsoft sign-in failed: could not retrieve your university email. Please ensure you are signing in with your UKIM Microsoft account.");
+      toast.error("Неуспешна Microsoft најава: не може да се преземе универзитетскиот емаил. Најавете се со UKIM Microsoft сметка.");
     } else if (error === "missing_state") {
-      toast.error("Verification session expired. Please try again.");
+      toast.error("Сесијата за верификација истече. Обидете се повторно.");
     } else if (error === "invalid_ukim_email") {
-      toast.error("That Microsoft account does not appear to be a UKIM university email.");
+      toast.error("Оваа Microsoft сметка не изгледа како UKIM универзитетски емаил.");
     }
   }, [searchParams]);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -40,7 +40,7 @@ function VerifyStudentContent() {
 
   const handleOtpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast("Phone verification will be available soon.");
+    toast("Телефонската верификација ќе биде достапна наскоро.");
     router.push("/auth/waitlist");
   };
 
@@ -115,8 +115,8 @@ function VerifyStudentContent() {
                <div className="w-12 h-12 bg-surface-raised rounded-lg flex items-center justify-center mb-4 text-foreground">
                 <CheckCircle2 size={24} />
               </div>
-              <CardTitle className="text-xl font-semibold">Enter verification code</CardTitle>
-              <CardDescription className="text-foreground-muted mt-1">We sent a 6-digit code to your phone.</CardDescription>
+              <CardTitle className="text-xl font-semibold">Внесете код за верификација</CardTitle>
+              <CardDescription className="text-foreground-muted mt-1">Испративме 6-цифрен код на вашиот телефон.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleOtpSubmit} className="space-y-6 text-left">

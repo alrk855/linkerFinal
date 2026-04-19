@@ -11,27 +11,27 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TYPE_OPTIONS = [
-  { value: "internship", label: "Internship" },
-  { value: "part_time", label: "Part-time" },
-  { value: "full_time", label: "Full-time" },
+  { value: "internship", label: "Практикантство" },
+  { value: "part_time", label: "Скратено работно време" },
+  { value: "full_time", label: "Полно работно време" },
 ];
 
 const FOCUS_OPTIONS = [
-  { value: "frontend", label: "Frontend" },
-  { value: "backend", label: "Backend" },
-  { value: "fullstack", label: "Fullstack" },
-  { value: "mobile", label: "Mobile" },
+  { value: "frontend", label: "Фронтенд" },
+  { value: "backend", label: "Бекенд" },
+  { value: "fullstack", label: "Фулстек" },
+  { value: "mobile", label: "Мобилен развој" },
   { value: "devops", label: "DevOps" },
-  { value: "data", label: "Data" },
-  { value: "other", label: "Other" },
+  { value: "data", label: "Податоци" },
+  { value: "other", label: "Друго" },
 ];
 
 const EXPERIENCE_OPTIONS = [
-  ["all", "Any level"],
-  ["no_experience", "No experience"],
-  ["junior", "Junior"],
-  ["mid", "Mid-level"],
-  ["senior", "Senior"],
+  ["all", "Секое ниво"],
+  ["no_experience", "Без искуство"],
+  ["junior", "Јуниор"],
+  ["mid", "Средно ниво"],
+  ["senior", "Сениор"],
 ] as const;
 
 export default function BrowseListingsPage() {
@@ -79,11 +79,11 @@ export default function BrowseListingsPage() {
   const FilterPanel = () => (
     <aside className="flex flex-col gap-7">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-base">Filters</h2>
-        {hasFilters && <button onClick={clearFilters} className="text-xs font-medium text-accent hover:text-accent-hover">Clear all</button>}
+        <h2 className="font-semibold text-base">Филтри</h2>
+        {hasFilters && <button onClick={clearFilters} className="text-xs font-medium text-accent hover:text-accent-hover">Исчисти</button>}
       </div>
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Type</h3>
+        <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Тип</h3>
         {TYPE_OPTIONS.map((t) => (
           <div key={t.value} className="flex items-center gap-2.5">
             <Checkbox id={`type-${t.value}`} checked={selectedTypes.includes(t.value)} onCheckedChange={() => toggle(t.value, selectedTypes, setSelectedTypes)} />
@@ -92,7 +92,7 @@ export default function BrowseListingsPage() {
         ))}
       </div>
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Focus Area</h3>
+        <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Област</h3>
         {FOCUS_OPTIONS.map((f) => (
           <div key={f.value} className="flex items-center gap-2.5">
             <Checkbox id={`focus-${f.value}`} checked={selectedFocus.includes(f.value)} onCheckedChange={() => toggle(f.value, selectedFocus, setSelectedFocus)} />
@@ -101,7 +101,7 @@ export default function BrowseListingsPage() {
         ))}
       </div>
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Experience</h3>
+        <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Искуство</h3>
         <RadioGroup value={experience} onValueChange={setExperience} className="space-y-2.5">
           {EXPERIENCE_OPTIONS.map(([v,l]) => (
             <div key={v} className="flex items-center gap-2.5">
@@ -129,7 +129,7 @@ export default function BrowseListingsPage() {
           <div className="mb-6 space-y-4">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">Opportunities Feed</h1>
-              <p className="text-sm text-foreground-muted mt-1">Discover your next career leap.</p>
+              <p className="text-sm text-foreground-muted mt-1">Откриј ја следната можност за кариера.</p>
             </div>
 
             <div className="flex gap-3">
@@ -138,7 +138,7 @@ export default function BrowseListingsPage() {
                 <Input 
                   value={query} 
                   onChange={(e) => setQuery(e.target.value)} 
-                  placeholder="Search titles, companies, skills..." 
+                  placeholder="Пребарај по наслов, компанија, вештина..." 
                   className="pl-10 bg-surface border-border h-12 shadow-sm rounded-xl focus-visible:ring-accent transition-all text-sm" 
                 />
               </div>
@@ -147,7 +147,7 @@ export default function BrowseListingsPage() {
                 onClick={() => setShowFilters(!showFilters)} 
                 className={`h-12 rounded-xl md:hidden px-4 ${hasFilters ? "border-accent text-accent bg-accent/5" : "border-border text-foreground-muted bg-surface"}`}
               >
-                <SlidersHorizontal size={16} className="mr-2" /> Filters
+                <SlidersHorizontal size={16} className="mr-2" /> Филтри
               </Button>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function BrowseListingsPage() {
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">
-                {loading ? "Refreshing..." : `${filtered.length} Result${filtered.length !== 1 ? "s" : ""}`}
+                {loading ? "Освежување..." : `${filtered.length} резултат${filtered.length !== 1 ? "и" : ""}`}
               </p>
             </div>
 
@@ -179,10 +179,10 @@ export default function BrowseListingsPage() {
                   <Search size={20} />
                 </div>
                 <h3 className="font-semibold text-base mb-1 text-foreground">No matches found</h3>
-                <p className="text-sm text-foreground-muted max-w-sm mx-auto mb-4">We couldn&apos;t find any listings matching your current filters.</p>
+                <p className="text-sm text-foreground-muted max-w-sm mx-auto mb-4">Не најдовме огласи што одговараат на избраните филтри.</p>
                 {hasFilters && (
                   <Button onClick={clearFilters} variant="outline" className="rounded-full shadow-sm">
-                    Clear all filters
+                    Исчисти ги филтрите
                   </Button>
                 )}
               </div>

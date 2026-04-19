@@ -8,7 +8,16 @@ import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigge
 import { MoreHorizontal, Plus, Pencil, Trash, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import { mk } from "date-fns/locale";
 import { toast } from "sonner";
+
+function formatListingType(value?: string) {
+  const key = (value || "").toLowerCase();
+  if (key === "internship") return "Практикантство";
+  if (key === "part_time" || key === "part-time") return "Скратено работно време";
+  if (key === "full_time" || key === "full-time") return "Полно работно време";
+  return value || "-";
+}
 
 export default function CompanyListingsPage() {
   const router = useRouter();
@@ -19,11 +28,11 @@ export default function CompanyListingsPage() {
     async function load() {
       try {
         const res = await fetch("/api/company/listings");
-        if (!res.ok) throw new Error("Failed to load listings");
+        if (!res.ok) throw new Error("Неуспешно вчитување на огласи");
         const data = await res.json();
         setListings(data.listings || []);
       } catch {
-        toast.error("Failed to load listings");
+        toast.error("Неуспешно вчитување на огласи");
       } finally {
         setLoading(false);
       }
@@ -43,36 +52,36 @@ export default function CompanyListingsPage() {
       setListings((prev) =>
         prev.map((l) => (l.id === listing.id ? { ...l, is_active: !l.is_active } : l))
       );
-      toast.success(`Listing ${!listing.is_active ? "activated" : "deactivated"}`);
+      toast.success(`Огласот е ${!listing.is_active ? "активиран" : "деактивиран"}.`);
     } catch {
-      toast.error("Failed to update listing");
+      toast.error("Неуспешна промена на огласот");
     }
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!confirm("Delete this listing? This cannot be undone.")) return;
+    if (!confirm("Да се избрише овој оглас? Оваа акција е неповратна.")) return;
     try {
       const res = await fetch(`/api/listings/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setListings((prev) => prev.filter((l) => l.id !== id));
-      toast.success("Listing deleted");
+      toast.success("Огласот е избришан");
     } catch {
-      toast.error("Failed to delete listing");
+      toast.error("Неуспешно бришење на оглас");
     }
   };
 
   return (
     <div className="flex-1 w-full max-w-6xl mx-auto px-4 lg:px-8 py-8 flex flex-col gap-6">
       <PageHeader
-        title="Your Listings"
-        description="Manage your job postings and review applications."
+        title="Ваши огласи"
+        description="Управувајте со огласите и прегледајте апликации."
         actions={
           <Button
             onClick={() => router.push("/company/listings/new")}
             className="bg-accent hover:bg-accent-hover text-white font-medium"
           >
-            <Plus size={16} className="mr-2" /> New Listing
+            <Plus size={16} className="mr-2" /> Нов оглас
           </Button>
         }
       />
@@ -81,13 +90,13 @@ export default function CompanyListingsPage() {
         <Table>
           <TableHeader className="bg-background">
             <TableRow className="border-border">
-              <TableHead className="font-medium text-foreground-muted py-4 px-5">Title</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden sm:table-cell">Type</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5">Slots</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden md:table-cell">Applications</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5">Status</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden lg:table-cell">Posted</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 text-right">Actions</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5">Наслов</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden sm:table-cell">Тип</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5">Слотови</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden md:table-cell">Апликации</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5">Статус</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden lg:table-cell">Објавен</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 text-right">Акции</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
@@ -102,12 +111,12 @@ export default function CompanyListingsPage() {
             ) : listings.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-12 text-foreground-muted">
-                  No listings yet.{" "}
+                  Се уште нема огласи.{" "}
                   <button
                     className="text-accent hover:underline"
                     onClick={() => router.push("/company/listings/new")}
                   >
-                    Post your first listing
+                    Објавете го првиот оглас
                   </button>
                 </TableCell>
               </TableRow>
@@ -119,7 +128,7 @@ export default function CompanyListingsPage() {
                   onClick={() => router.push(`/company/listings/${l.id}`)}
                 >
                   <TableCell className="font-medium text-foreground px-5 py-4">{l.title}</TableCell>
-                  <TableCell className="hidden sm:table-cell text-foreground-muted px-5 py-4 text-sm">{l.listing_type}</TableCell>
+                  <TableCell className="hidden sm:table-cell text-foreground-muted px-5 py-4 text-sm">{formatListingType(l.listing_type)}</TableCell>
                   <TableCell className="text-foreground-muted px-5 py-4 text-sm">
                     {l.slots_remaining} / {l.total_slots}
                   </TableCell>
@@ -134,19 +143,19 @@ export default function CompanyListingsPage() {
                           : "bg-surface-raised text-foreground-faint border-border"
                       }`}
                     >
-                      {l.is_active ? "Active" : "Inactive"}
+                      {l.is_active ? "Активен" : "Неактивен"}
                     </span>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-foreground-muted px-5 py-4 text-sm">
                     {l.created_at
-                      ? formatDistanceToNow(new Date(l.created_at), { addSuffix: true })
+                      ? formatDistanceToNow(new Date(l.created_at), { addSuffix: true, locale: mk })
                       : "—"}
                   </TableCell>
                   <TableCell className="text-right px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-surface-raised">
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">Отвори мени</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -155,20 +164,20 @@ export default function CompanyListingsPage() {
                           className="cursor-pointer hover:bg-surface-raised"
                           onClick={(e) => { e.stopPropagation(); router.push(`/company/listings/${l.id}`); }}
                         >
-                          <Pencil className="mr-2 h-4 w-4" /> Edit
+                          <Pencil className="mr-2 h-4 w-4" /> Уреди
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="cursor-pointer hover:bg-surface-raised"
                           onClick={(e) => handleToggle(e, l)}
                         >
                           <Power className="mr-2 h-4 w-4" />
-                          {l.is_active ? "Deactivate" : "Activate"}
+                          {l.is_active ? "Деактивирај" : "Активирај"}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="cursor-pointer text-destructive focus:text-destructive hover:bg-destructive/10"
                           onClick={(e) => handleDelete(e, l.id)}
                         >
-                          <Trash className="mr-2 h-4 w-4" /> Delete
+                          <Trash className="mr-2 h-4 w-4" /> Избриши
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

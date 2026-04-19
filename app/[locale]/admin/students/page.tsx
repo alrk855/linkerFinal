@@ -24,7 +24,7 @@ export default function AdminStudentsPage() {
         const data = await res.json();
         setStudents(data.students || []);
       } catch {
-        toast.error("Failed to load students");
+        toast.error("Неуспешно вчитување студенти");
       } finally {
         setLoading(false);
       }
@@ -42,14 +42,14 @@ export default function AdminStudentsPage() {
       });
       if (!res.ok) throw new Error();
       setStudents((prev) => prev.map((s) => s.id === id ? { ...s, is_verified_student: true } : s));
-      toast.success("Student verified");
+      toast.success("Студентот е верификуван");
     } catch {
-      toast.error("Failed to verify student");
+      toast.error("Неуспешна верификација на студент");
     }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm("Reject and flag this student account?")) return;
+    if (!confirm("Да се одбие и означи оваа студентска сметка?")) return;
     try {
       const res = await fetch(`/api/admin/students/${id}/verify`, {
         method: "PATCH",
@@ -58,17 +58,17 @@ export default function AdminStudentsPage() {
       });
       if (!res.ok) throw new Error();
       setStudents((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Student rejected");
+      toast.success("Студентот е одбиен");
     } catch {
-      toast.error("Failed to reject student");
+      toast.error("Неуспешно одбивање студент");
     }
   };
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
       <PageHeader
-        title="Student Management"
-        description="Review student registrations and manage verification status."
+        title="Управување со студенти"
+        description="Прегледајте студентски регистрации и управувајте со верификација."
         className="pt-0 mt-0 sm:pt-0 pb-2 mb-2 border-none"
       />
 
@@ -83,7 +83,7 @@ export default function AdminStudentsPage() {
                 : "bg-surface border-border text-foreground-muted hover:bg-surface-raised"
             }`}
           >
-            {f}
+            {f === "all" ? "сите" : f === "pending" ? "на чекање" : "верификувани"}
           </button>
         ))}
       </div>
@@ -92,11 +92,11 @@ export default function AdminStudentsPage() {
         <Table>
           <TableHeader className="bg-background">
             <TableRow className="border-border">
-              <TableHead className="font-medium text-foreground-muted py-4 px-5">User</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden md:table-cell">Email</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden sm:table-cell">Faculty</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5">Status</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 text-right">Actions</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5">Корисник</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden md:table-cell">Емаил</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden sm:table-cell">Факултет</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5">Статус</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 text-right">Акции</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
@@ -111,7 +111,7 @@ export default function AdminStudentsPage() {
             ) : students.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-12 text-foreground-muted text-sm">
-                  No students found.
+                  Не се пронајдени студенти.
                 </TableCell>
               </TableRow>
             ) : (
@@ -119,7 +119,7 @@ export default function AdminStudentsPage() {
                 <TableRow key={s.id} className="hover:bg-surface-raised transition-colors">
                   <TableCell className="px-5 py-4">
                     <div className="flex flex-col">
-                      <span className="font-medium text-foreground">{s.full_name || "Unknown"}</span>
+                      <span className="font-medium text-foreground">{s.full_name || "Непознат"}</span>
                       <span className="text-xs text-foreground-muted font-mono">@{s.username}</span>
                     </div>
                   </TableCell>
@@ -127,9 +127,9 @@ export default function AdminStudentsPage() {
                   <TableCell className="hidden sm:table-cell px-5 py-4 text-foreground-muted text-sm">{s.faculty || "—"}</TableCell>
                   <TableCell className="px-5 py-4">
                     {s.is_verified_student ? (
-                      <Badge variant="outline" className="bg-success/10 text-success border-success/20">Verified</Badge>
+                      <Badge variant="outline" className="bg-success/10 text-success border-success/20">Верификуван</Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">Pending</Badge>
+                      <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">На чекање</Badge>
                     )}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-right">
@@ -138,7 +138,7 @@ export default function AdminStudentsPage() {
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 hover:bg-surface-raised"
-                        title="View Profile"
+                        title="Види профил"
                         onClick={() => s.username && router.push(`/profile/${s.username}`)}
                       >
                         <Eye size={16} className="text-foreground-muted" />
@@ -148,7 +148,7 @@ export default function AdminStudentsPage() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 hover:bg-success/20 hover:text-success"
-                          title="Verify"
+                          title="Верификувај"
                           onClick={() => handleApprove(s.id)}
                         >
                           <Check size={16} />
@@ -158,7 +158,7 @@ export default function AdminStudentsPage() {
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
-                        title="Reject"
+                        title="Одбиј"
                         onClick={() => handleReject(s.id)}
                       >
                         <X size={16} />

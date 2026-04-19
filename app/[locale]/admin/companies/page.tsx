@@ -24,7 +24,7 @@ export default function AdminCompaniesPage() {
         const data = await res.json();
         setCompanies(data.companies || []);
       } catch {
-        toast.error("Failed to load companies");
+        toast.error("Неуспешно вчитување компании");
       } finally {
         setLoading(false);
       }
@@ -40,31 +40,31 @@ export default function AdminCompaniesPage() {
       setCompanies((prev) =>
         prev.map((c) => c.id === id ? { ...c, approval_status: "approved" } : c)
       );
-      toast.success("Company approved");
+      toast.success("Компанијата е одобрена");
     } catch {
-      toast.error("Failed to approve company");
+      toast.error("Неуспешно одобрување компанија");
     }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm("Reject this company account?")) return;
+    if (!confirm("Да се одбие оваа компаниска сметка?")) return;
     try {
       const res = await fetch(`/api/admin/companies/${id}/reject`, { method: "PATCH" });
       if (!res.ok) throw new Error();
       setCompanies((prev) =>
         prev.map((c) => c.id === id ? { ...c, approval_status: "rejected" } : c)
       );
-      toast.success("Company rejected");
+      toast.success("Компанијата е одбиена");
     } catch {
-      toast.error("Failed to reject company");
+      toast.error("Неуспешно одбивање компанија");
     }
   };
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
       <PageHeader
-        title="Company Management"
-        description="Approve company accounts and adjust acknowledgment quotas."
+        title="Управување со компании"
+        description="Одобрувајте компании и прилагодувајте квоти за потврди."
         className="pt-0 mt-0 sm:pt-0 pb-2 mb-2 border-none"
       />
 
@@ -79,7 +79,7 @@ export default function AdminCompaniesPage() {
                 : "bg-surface border-border text-foreground-muted hover:bg-surface-raised"
             }`}
           >
-            {f}
+            {f === "all" ? "сите" : f === "pending" ? "на чекање" : f === "approved" ? "одобрени" : "одбиени"}
           </button>
         ))}
       </div>
@@ -88,11 +88,11 @@ export default function AdminCompaniesPage() {
         <Table>
           <TableHeader className="bg-background">
             <TableRow className="border-border">
-              <TableHead className="font-medium text-foreground-muted py-4 px-5">Company</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden md:table-cell">Email</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5">Status</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden sm:table-cell">Slots</TableHead>
-              <TableHead className="font-medium text-foreground-muted py-4 px-5 text-right">Actions</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5">Компанија</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden md:table-cell">Емаил</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5">Статус</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden sm:table-cell">Слотови</TableHead>
+              <TableHead className="font-medium text-foreground-muted py-4 px-5 text-right">Акции</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border">
@@ -107,7 +107,7 @@ export default function AdminCompaniesPage() {
             ) : companies.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-12 text-foreground-muted text-sm">
-                  No companies found.
+                  Не се пронајдени компании.
                 </TableCell>
               </TableRow>
             ) : (
@@ -126,15 +126,15 @@ export default function AdminCompaniesPage() {
                   </TableCell>
                   <TableCell className="px-5 py-4">
                     {c.approval_status === "approved" ? (
-                      <Badge variant="outline" className="bg-success/10 text-success border-success/20">Approved</Badge>
+                      <Badge variant="outline" className="bg-success/10 text-success border-success/20">Одобрено</Badge>
                     ) : c.approval_status === "rejected" ? (
-                      <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">Rejected</Badge>
+                      <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">Одбиено</Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">Pending</Badge>
+                      <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">На чекање</Badge>
                     )}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell px-5 py-4 text-foreground-muted text-sm">
-                    {c.slots_limit ?? "—"} max
+                    {c.slots_limit ?? "—"} максимум
                   </TableCell>
                   <TableCell className="px-5 py-4 text-right">
                     <div className="flex justify-end gap-2">
@@ -143,7 +143,7 @@ export default function AdminCompaniesPage() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 hover:bg-surface-raised"
-                          title="View Profile"
+                          title="Види профил"
                           onClick={() => router.push(`/profile/${c.profiles.username}`)}
                         >
                           <Eye size={16} className="text-foreground-muted" />
@@ -154,7 +154,7 @@ export default function AdminCompaniesPage() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 hover:bg-success/20 hover:text-success"
-                          title="Approve"
+                          title="Одобри"
                           onClick={() => handleApprove(c.id)}
                         >
                           <CheckCircle size={16} />
@@ -165,7 +165,7 @@ export default function AdminCompaniesPage() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
-                          title="Suspend"
+                          title="Суспендирај"
                           onClick={() => handleReject(c.id)}
                         >
                           <ShieldAlert size={16} />

@@ -9,6 +9,7 @@ import { Check, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { mk } from "date-fns/locale";
 
 type StudentAck = {
   id: string;
@@ -72,6 +73,22 @@ function getStudent(row: CompanyAckGroup["items"][number]) {
   return Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
 }
 
+function formatListingType(value?: string | null) {
+  const key = (value || "").toLowerCase();
+  if (key === "internship") return "практикантство";
+  if (key === "part_time" || key === "part-time") return "скратено работно време";
+  if (key === "full_time" || key === "full-time") return "полно работно време";
+  return key ? key.replace(/_/g, " ") : "улога";
+}
+
+function formatAckStatus(value?: string) {
+  const key = (value || "pending").toLowerCase();
+  if (key === "pending") return "на чекање";
+  if (key === "accepted") return "прифатено";
+  if (key === "declined") return "одбиено";
+  return key;
+}
+
 export default function AcknowledgmentsPage() {
   const { user, isLoading } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -84,14 +101,14 @@ export default function AcknowledgmentsPage() {
       setLoading(true);
       const res = await fetch("/api/acknowledgments/my");
       if (!res.ok) {
-        throw new Error("Failed to load acknowledgments");
+        throw new Error("Неуспешно вчитување потврди");
       }
 
       const data = await res.json();
       setStudentRows(Array.isArray(data.acknowledgments) ? data.acknowledgments : []);
       setCompanyGroups(Array.isArray(data.grouped_acknowledgments) ? data.grouped_acknowledgments : []);
     } catch (error: any) {
-      toast.error(error?.message || "Failed to load acknowledgments.");
+      toast.error(error?.message || "Неуспешно вчитување потврди.");
     } finally {
       setLoading(false);
     }
@@ -117,13 +134,13 @@ export default function AcknowledgmentsPage() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error?.message || "Failed to update acknowledgment");
+        throw new Error(body?.error?.message || "Неуспешно ажурирање потврда");
       }
 
       setStudentRows((prev) => prev.map((row) => (row.id === id ? { ...row, status } : row)));
-      toast.success(status === "accepted" ? "Acknowledgment accepted." : "Acknowledgment declined.");
+      toast.success(status === "accepted" ? "Потврдата е прифатена." : "Потврдата е одбиена.");
     } catch (error: any) {
-      toast.error(error?.message || "Failed to update acknowledgment.");
+      toast.error(error?.message || "Неуспешно ажурирање потврда.");
     } finally {
       setActingId(null);
     }
@@ -140,30 +157,30 @@ export default function AcknowledgmentsPage() {
   if (user.role === "student") {
     return (
       <div className="flex-1 w-full max-w-5xl mx-auto px-4 lg:px-8 py-8 flex flex-col gap-6">
-        <PageHeader title="Inbox" description="Manage acknowledgment requests from companies." />
+        <PageHeader title="Сандаче" description="Управувајте со барања за потврда од компании." />
 
         <Tabs defaultValue="pending" className="w-full">
           <TabsList className="mb-6 bg-surface border border-border">
             <TabsTrigger value="pending" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-              Pending Requests
+              Барања на чекање
               <span className="ml-2 bg-accent text-background text-[10px] px-1.5 py-0.5 rounded-full font-bold">
                 {pending.length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="accepted" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
-              Connections
+              Поврзувања
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending" className="space-y-4">
             {pending.length === 0 ? (
               <div className="rounded-xl border border-border bg-surface p-8 text-sm text-foreground-muted">
-                No pending acknowledgment requests.
+                Нема барања за потврда на чекање.
               </div>
             ) : (
               pending.map((row) => {
                 const company = getCompany(row);
-                const listingTitle = row.listings?.title || "a listing";
+                const listingTitle = row.listings?.title || "оглас";
                 return (
                   <div key={row.id} className="bg-surface border border-border rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex gap-4 items-start">
@@ -175,15 +192,15 @@ export default function AcknowledgmentsPage() {
                       </Avatar>
                       <div>
                         <h3 className="font-medium text-foreground">
-                          Acknowledgment Request from {company?.company_name || "Company"}
+                          Барање за потврда од {company?.company_name || "компанија"}
                         </h3>
                         <p className="text-sm text-foreground-muted mt-1 leading-relaxed max-w-xl">
-                          They want to reveal your identity for <strong>{listingTitle}</strong>.
+                          Сакаат да го откријат вашиот идентитет за <strong>{listingTitle}</strong>.
                         </p>
                         <span className="text-xs text-foreground-faint mt-2 block">
                           {row.created_at
-                            ? formatDistanceToNow(new Date(row.created_at), { addSuffix: true })
-                            : "Recently"}
+                            ? formatDistanceToNow(new Date(row.created_at), { addSuffix: true, locale: mk })
+                            : "Неодамна"}
                         </span>
                       </div>
                     </div>
@@ -194,14 +211,14 @@ export default function AcknowledgmentsPage() {
                         disabled={actingId === row.id}
                         onClick={() => handleDecision(row.id, "declined")}
                       >
-                        <X size={16} className="mr-2" /> Decline
+                        <X size={16} className="mr-2" /> Одбиј
                       </Button>
                       <Button
                         className="flex-1 bg-accent hover:bg-accent-hover text-background font-medium"
                         disabled={actingId === row.id}
                         onClick={() => handleDecision(row.id, "accepted")}
                       >
-                        <Check size={16} className="mr-2" /> Accept
+                        <Check size={16} className="mr-2" /> Прифати
                       </Button>
                     </div>
                   </div>
@@ -213,7 +230,7 @@ export default function AcknowledgmentsPage() {
           <TabsContent value="accepted" className="space-y-4">
             {accepted.length === 0 ? (
               <div className="rounded-xl border border-border bg-surface p-8 text-sm text-foreground-muted">
-                No accepted acknowledgments yet.
+                Се уште нема прифатени потврди.
               </div>
             ) : (
               accepted.map((row) => {
@@ -228,12 +245,12 @@ export default function AcknowledgmentsPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-medium text-foreground">{company?.company_name || "Company"}</h3>
+                        <h3 className="font-medium text-foreground">{company?.company_name || "Компанија"}</h3>
                         <p className="text-sm text-foreground-muted">
-                          Accepted {row.created_at ? formatDistanceToNow(new Date(row.created_at), { addSuffix: true }) : "recently"}
+                          Прифатено {row.created_at ? formatDistanceToNow(new Date(row.created_at), { addSuffix: true, locale: mk }) : "неодамна"}
                         </p>
                         {row.listings?.title ? (
-                          <p className="text-xs text-foreground-faint mt-1">For: {row.listings.title}</p>
+                          <p className="text-xs text-foreground-faint mt-1">За: {row.listings.title}</p>
                         ) : null}
                       </div>
                     </div>
@@ -249,20 +266,20 @@ export default function AcknowledgmentsPage() {
 
   return (
     <div className="flex-1 w-full max-w-6xl mx-auto px-4 lg:px-8 py-8 flex flex-col gap-6">
-      <PageHeader title="Sent Acknowledgments" description="Track the status of acknowledgment requests sent to candidates." />
+      <PageHeader title="Испратени потврди" description="Следете го статусот на потврди испратени до кандидати." />
 
       {companyGroups.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-8 text-sm text-foreground-muted">
-          No acknowledgments sent yet.
+          Се уште нема испратени потврди.
         </div>
       ) : (
         <div className="space-y-6">
           {companyGroups.map((group, idx) => (
             <div key={`${group.listing?.id || "listing"}-${idx}`} className="rounded-xl border border-border bg-surface overflow-hidden">
               <div className="px-5 py-4 border-b border-border bg-background/70">
-                <h3 className="font-medium text-foreground">{group.listing?.title || "Listing"}</h3>
+                <h3 className="font-medium text-foreground">{group.listing?.title || "Оглас"}</h3>
                 <p className="text-xs text-foreground-muted mt-1">
-                  {group.listing?.listing_type ? group.listing.listing_type.replace(/_/g, " ") : "Role"}
+                  {formatListingType(group.listing?.listing_type)}
                   {group.listing?.focus_area ? ` · ${group.listing.focus_area}` : ""}
                 </p>
               </div>
@@ -281,15 +298,15 @@ export default function AcknowledgmentsPage() {
                       <div>
                         <p className="text-sm font-medium text-foreground">
                           {item.status === "accepted"
-                            ? student?.full_name || student?.username || "Student"
-                            : "Anonymous Student"}
+                            ? student?.full_name || student?.username || "Студент"
+                            : "Анонимен студент"}
                         </p>
                         <p className="text-xs text-foreground-muted mt-1">
-                          Sent {item.created_at ? formatDistanceToNow(new Date(item.created_at), { addSuffix: true }) : "recently"}
+                          Испратено {item.created_at ? formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: mk }) : "неодамна"}
                         </p>
                       </div>
                       <span className={`px-2 py-1 rounded-md text-xs font-medium border capitalize ${statusTone}`}>
-                        {item.status}
+                        {formatAckStatus(item.status)}
                       </span>
                     </div>
                   );

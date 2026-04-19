@@ -15,16 +15,16 @@ interface ProfileSidebarProps {
 
 export const SECTIONS = {
   STUDENT: [
-    { id: "basic", label: "Basic Information", required: true },
-    { id: "academic", label: "Academic Details", required: true },
-    { id: "skills", label: "Skills", required: true },
-    { id: "links", label: "Links", required: false },
-    { id: "documents", label: "Documents", required: false },
+    { id: "basic", label: "Основни информации", required: true },
+    { id: "academic", label: "Академски детали", required: true },
+    { id: "skills", label: "Вештини", required: true },
+    { id: "links", label: "Линкови", required: false },
+    { id: "documents", label: "Документи", required: false },
   ],
   COMPANY: [
-    { id: "basic", label: "Basic Information", required: true },
-    { id: "company", label: "Company Information", required: true },
-    { id: "links", label: "Links", required: false },
+    { id: "basic", label: "Основни информации", required: true },
+    { id: "company", label: "Информации за компанија", required: true },
+    { id: "links", label: "Линкови", required: false },
   ]
 };
 

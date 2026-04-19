@@ -9,20 +9,20 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 
 const FOCUS_AREAS = [
-  { value: "frontend", label: "Frontend" },
-  { value: "backend", label: "Backend" },
-  { value: "fullstack", label: "Fullstack" },
-  { value: "mobile", label: "Mobile" },
+  { value: "frontend", label: "Фронтенд" },
+  { value: "backend", label: "Бекенд" },
+  { value: "fullstack", label: "Фулстек" },
+  { value: "mobile", label: "Мобилен развој" },
   { value: "devops", label: "DevOps" },
-  { value: "data", label: "Data" },
-  { value: "other", label: "Other" },
+  { value: "data", label: "Податоци" },
+  { value: "other", label: "Друго" },
 ];
 
 const EXPERIENCE_LEVELS = [
-  { value: "no_experience", label: "No experience" },
-  { value: "junior", label: "Junior" },
-  { value: "mid", label: "Mid-level" },
-  { value: "senior", label: "Senior" },
+  { value: "no_experience", label: "Без искуство" },
+  { value: "junior", label: "Јуниор" },
+  { value: "mid", label: "Средно ниво" },
+  { value: "senior", label: "Сениор" },
 ];
 
 type Candidate = {
@@ -94,7 +94,7 @@ export default function CompanyDiscoverPage() {
         ]);
 
         if (!discoverRes.ok) {
-          throw new Error("Failed to load candidates");
+          throw new Error("Неуспешно вчитување кандидати");
         }
 
         const discoverData = await discoverRes.json();
@@ -147,7 +147,7 @@ export default function CompanyDiscoverPage() {
           setSelectedListingId(listingWithSlots?.id || ownListings[0]?.id || "");
         }
       } catch (error: any) {
-        toast.error(error?.message || "Failed to load candidates.");
+        toast.error(error?.message || "Неуспешно вчитување кандидати.");
       } finally {
         setLoading(false);
       }
@@ -201,12 +201,12 @@ export default function CompanyDiscoverPage() {
 
   const handleAcknowledge = async (candidateId: string) => {
     if (!selectedListingId) {
-      toast.error("Select an active listing before sending acknowledgments.");
+      toast.error("Изберете активен оглас пред да испратите потврда.");
       return;
     }
 
     if (!selectedListing || selectedListing.slots_remaining <= 0) {
-      toast.error("The selected listing has no acknowledgment slots remaining.");
+      toast.error("Избраниот оглас нема преостанати слотови за потврди.");
       return;
     }
 
@@ -224,7 +224,7 @@ export default function CompanyDiscoverPage() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error?.message || "Failed to send acknowledgment");
+        throw new Error(body?.error?.message || "Неуспешно испраќање потврда");
       }
 
       created = true;
@@ -238,12 +238,12 @@ export default function CompanyDiscoverPage() {
         )
       );
 
-      toast.success("Acknowledgment sent.");
+      toast.success("Потврдата е испратена.");
     } catch (error: any) {
       if (created) {
-        toast.error("Acknowledgment was created, but the local view did not fully refresh.");
+        toast.error("Потврдата е креирана, но локалниот приказ не се освежи целосно.");
       }
-      toast.error(error?.message || "Failed to send acknowledgment");
+      toast.error(error?.message || "Неуспешно испраќање потврда");
     } finally {
       setAcknowledging(null);
     }
@@ -253,7 +253,7 @@ export default function CompanyDiscoverPage() {
     <div className="flex-1 w-full max-w-7xl mx-auto px-4 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
       <aside className="w-full md:w-64 shrink-0 flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-lg">Filters</h2>
+          <h2 className="font-semibold text-lg">Филтри</h2>
           <button
             className="text-sm text-foreground-muted hover:text-foreground transition-colors"
             onClick={() => {
@@ -263,14 +263,14 @@ export default function CompanyDiscoverPage() {
               setVerifiedOnly(true);
             }}
           >
-            Clear
+            Исчисти
           </button>
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Faculty</h3>
+          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Факултет</h3>
           {faculties.length === 0 ? (
-            <p className="text-xs text-foreground-faint">No faculty data available.</p>
+            <p className="text-xs text-foreground-faint">Нема достапни податоци за факултет.</p>
           ) : (
             faculties.map((faculty) => (
               <div key={faculty} className="flex items-center space-x-2">
@@ -282,7 +282,7 @@ export default function CompanyDiscoverPage() {
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Focus Area</h3>
+          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Област</h3>
           {FOCUS_AREAS.map((focus) => (
             <div key={focus.value} className="flex items-center space-x-2">
               <Checkbox
@@ -296,11 +296,11 @@ export default function CompanyDiscoverPage() {
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Experience</h3>
+          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Искуство</h3>
           <RadioGroup value={experience} onValueChange={setExperience} className="space-y-2">
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="all" id="exp-all" />
-              <Label htmlFor="exp-all" className="font-normal text-sm cursor-pointer">Any level</Label>
+              <Label htmlFor="exp-all" className="font-normal text-sm cursor-pointer">Секое ниво</Label>
             </div>
             {EXPERIENCE_LEVELS.map((level) => (
               <div key={level.value} className="flex items-center space-x-2">
@@ -312,25 +312,25 @@ export default function CompanyDiscoverPage() {
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Status</h3>
+          <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Статус</h3>
           <div className="flex items-center space-x-2">
             <Checkbox id="verified-only" checked={verifiedOnly} onCheckedChange={(v) => setVerifiedOnly(!!v)} />
-            <Label htmlFor="verified-only" className="font-normal text-sm cursor-pointer">Verified students only</Label>
+            <Label htmlFor="verified-only" className="font-normal text-sm cursor-pointer">Само верификувани студенти</Label>
           </div>
         </div>
       </aside>
 
       <main className="flex-1 min-w-0">
         <PageHeader
-          title="Discover Candidates"
-          description="Browse anonymous student profiles matched to your listings."
+          title="Откриј кандидати"
+          description="Пребарувајте анонимни студентски профили според вашите огласи."
           className="pt-0 mt-0 sm:pt-0 border-none pb-4 mb-2 max-w-2xl"
         />
 
         <div className="p-4 bg-accent/5 border border-accent/20 rounded-xl mb-6 flex flex-col sm:flex-row gap-4 sm:items-end sm:justify-between">
           <div className="space-y-2 w-full sm:max-w-md">
             <Label htmlFor="listing-selector" className="text-xs uppercase tracking-wider text-foreground-muted">
-              Send acknowledgments from
+              Испрати потврди од
             </Label>
             <select
               id="listing-selector"
@@ -339,11 +339,11 @@ export default function CompanyDiscoverPage() {
               onChange={(e) => setSelectedListingId(e.target.value)}
             >
               {listings.length === 0 ? (
-                <option value="">No active listings</option>
+                <option value="">Нема активни огласи</option>
               ) : (
                 listings.map((listing) => (
                   <option key={listing.id} value={listing.id}>
-                    {listing.title} ({listing.slots_remaining} slots left)
+                    {listing.title} ({listing.slots_remaining} слотови преостанати)
                   </option>
                 ))
               )}
@@ -351,10 +351,10 @@ export default function CompanyDiscoverPage() {
           </div>
           <div className="text-sm text-foreground-muted">
             <div>
-              Selected listing: <strong>{selectedListing ? selectedListing.slots_remaining : 0} slots</strong>
+              Избран оглас: <strong>{selectedListing ? selectedListing.slots_remaining : 0} слотови</strong>
             </div>
             <div>
-              All active listings: <strong>{totalSlotsRemaining} slots</strong>
+              Сите активни огласи: <strong>{totalSlotsRemaining} слотови</strong>
             </div>
           </div>
         </div>
@@ -367,7 +367,7 @@ export default function CompanyDiscoverPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-foreground-muted text-sm">No candidates match your filters.</p>
+            <p className="text-foreground-muted text-sm">Нема кандидати што одговараат на филтрите.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

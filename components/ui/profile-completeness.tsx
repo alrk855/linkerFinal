@@ -12,7 +12,7 @@ export function ProfileCompleteness({ value, className }: ProfileCompletenessPro
   return (
     <div className={cn("flex flex-col gap-1.5 w-full", className)}>
       <div className="flex justify-between items-center text-xs font-medium text-foreground-muted">
-        <span>Profile completeness</span>
+        <span>Комплетност на профил</span>
         <span>{Math.round(clampedValue)}%</span>
       </div>
       <div className="h-1.5 w-full bg-surface-raised rounded-full overflow-hidden">

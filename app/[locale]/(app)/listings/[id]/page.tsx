@@ -16,6 +16,14 @@ const TYPE_STYLES: Record<string, string> = {
   "Full-time": "badge-fulltime",
 };
 
+function formatListingType(value?: string) {
+  const key = (value || "").toLowerCase();
+  if (key === "internship") return "Практикантство";
+  if (key === "part_time" || key === "part-time") return "Скратено работно време";
+  if (key === "full_time" || key === "full-time") return "Полно работно време";
+  return value || "-";
+}
+
 export default function ListingDetailPage({ params }: { params: { id: string } }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -39,14 +47,14 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ listing_id: params.id }),
       });
-      if (!res.ok) { const b = await res.json().catch(() => null); throw new Error(b?.error?.message || "Could not apply."); }
-      toast.success("Application submitted!");
+      if (!res.ok) { const b = await res.json().catch(() => null); throw new Error(b?.error?.message || "Аплицирањето не успеа."); }
+      toast.success("Апликацијата е успешно испратена!");
       setListing((l: any) => ({ ...l, has_applied: true }));
-    } catch (e: any) { toast.error(e.message || "Failed to apply."); } finally { setApplying(false); }
+    } catch (e: any) { toast.error(e.message || "Аплицирањето не успеа."); } finally { setApplying(false); }
   };
 
   if (loading) return <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-12 space-y-6 animate-pulse"><div className="h-8 bg-surface-raised rounded w-1/2" /><div className="h-64 bg-surface rounded-xl" /></div>;
-  if (!listing) return <div className="flex-1 flex items-center justify-center p-8"><p className="text-foreground-muted">Listing not found.</p></div>;
+  if (!listing) return <div className="flex-1 flex items-center justify-center p-8"><p className="text-foreground-muted">Огласот не е пронајден.</p></div>;
 
   const company = Array.isArray(listing.company_profiles) ? listing.company_profiles[0] : listing.company_profiles;
   const skills = (listing.listing_skills || []).map((ls: any) => ls.skills || ls).filter(Boolean);
@@ -55,7 +63,7 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
 
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 lg:px-8 py-8 md:py-12 flex flex-col gap-8">
-      <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors w-fit"><ArrowLeft size={16} /> Back</button>
+      <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors w-fit"><ArrowLeft size={16} /> Назад</button>
       <div className="bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-card">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 text-accent font-bold text-xl">
@@ -78,7 +86,7 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
               {company?.size_range && <><span>·</span><span className="flex items-center gap-1"><Users size={13} />{company.size_range}</span></>}
             </div>
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border", typeStyle)}>{listing.listing_type}</span>
+              <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border", typeStyle)}>{formatListingType(listing.listing_type)}</span>
               {listing.focus_area && <span className="text-xs px-2.5 py-1 rounded-full bg-surface-raised border border-border text-foreground-muted">{listing.focus_area}</span>}
               {listing.experience_level && <span className="text-xs px-2.5 py-1 rounded-full bg-surface-raised border border-border text-foreground-muted">{listing.experience_level}</span>}
             </div>
@@ -88,12 +96,12 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <div className="bg-surface border border-border rounded-xl p-6 shadow-card">
-            <h2 className="text-lg font-semibold mb-4">Description</h2>
-            <p className="text-foreground-muted leading-relaxed whitespace-pre-wrap text-sm">{listing.description || "No description."}</p>
+            <h2 className="text-lg font-semibold mb-4">Опис</h2>
+            <p className="text-foreground-muted leading-relaxed whitespace-pre-wrap text-sm">{listing.description || "Нема опис."}</p>
           </div>
           {skills.length > 0 && (
             <div className="bg-surface border border-border rounded-xl p-6 shadow-card">
-              <h2 className="text-lg font-semibold mb-4">Required Skills</h2>
+              <h2 className="text-lg font-semibold mb-4">Потребни вештини</h2>
               <div className="flex flex-wrap gap-2">{skills.map((s: any) => <SkillTag key={s.id || s.name} name={s.name} />)}</div>
             </div>
           )}
@@ -101,17 +109,17 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
         <div>
           <Card className="bg-surface border-border shadow-card sticky top-24">
             <CardContent className="p-6 flex flex-col gap-5">
-              <div className="text-center"><div className="text-3xl font-bold text-accent">{listing.slots_remaining}</div><div className="text-sm text-foreground-muted mt-1">positions available</div></div>
+              <div className="text-center"><div className="text-3xl font-bold text-accent">{listing.slots_remaining}</div><div className="text-sm text-foreground-muted mt-1">слободни позиции</div></div>
               {listing.has_applied ? (
-                <div className="flex items-center justify-center gap-2 text-success bg-success/10 border border-success/20 rounded-lg px-4 py-3 text-sm font-medium"><CheckCircle2 size={16} /> Applied!</div>
+                <div className="flex items-center justify-center gap-2 text-success bg-success/10 border border-success/20 rounded-lg px-4 py-3 text-sm font-medium"><CheckCircle2 size={16} /> Аплицирано!</div>
               ) : canApply ? (
                 <Button onClick={apply} disabled={applying || listing.slots_remaining === 0} className="w-full bg-accent hover:bg-accent-hover text-white font-semibold h-11">
-                  {applying ? "Submitting..." : listing.slots_remaining === 0 ? "No slots left" : "Apply now"}
+                  {applying ? "Се испраќа..." : listing.slots_remaining === 0 ? "Нема слотови" : "Аплицирај"}
                 </Button>
               ) : (
-                <p className="text-xs text-center text-foreground-muted">{user?.role === "student" ? "Verify your account to apply." : "Only verified students can apply."}</p>
+                <p className="text-xs text-center text-foreground-muted">{user?.role === "student" ? "Верификувајте ја сметката за да аплицирате." : "Само верификувани студенти можат да аплицираат."}</p>
               )}
-              <p className="text-xs text-center text-foreground-faint">Identity revealed only after mutual acknowledgment.</p>
+              <p className="text-xs text-center text-foreground-faint">Идентитетот се открива само по меѓусебна потврда.</p>
             </CardContent>
           </Card>
         </div>

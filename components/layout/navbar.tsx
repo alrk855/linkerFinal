@@ -41,9 +41,6 @@ export function Navbar() {
         <div className="flex items-center gap-8 min-w-0">
           {/* Left: Logo */}
           <Link href={logoHref} className="flex items-center gap-3 shrink-0">
-            <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-white font-bold text-xs">
-              L
-            </div>
             <span className="font-medium text-foreground">Link<span className="text-accent">er</span></span>
           </Link>
 
