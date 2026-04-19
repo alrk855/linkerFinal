@@ -20,9 +20,8 @@ export function Navbar() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const t = useTranslations("Common"); // Assuming Common has generic stuff, maybe need explicit translations if any
+  const t = useTranslations("Common");
 
-  // Simplified language toggler
   const toggleLocale = () => {
     const nextLocale = locale === "en" ? "mk" : "en";
     let newPath = pathname;
@@ -39,10 +38,9 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { href: "/dashboard", label: "Dashboard" },
     { href: "/listings", label: "Listings" },
-    { href: "/company/discover", label: "Discover Candidates", role: "company" },
-    { href: "/acknowledgments", label: "Acknowledgments", role: "student" },
+    { href: "/company/discover", label: "Discover", role: "company" },
+    { href: "/acknowledgments", label: "Inbox", role: "student" },
   ];
 
   const visibleLinks = navLinks.filter(l => !l.role || l.role === user?.role);
@@ -52,11 +50,11 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8 min-w-0">
           {/* Left: Logo */}
-          <Link href="/dashboard" className="flex items-center gap-3 shrink-0">
-            <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-foreground font-bold text-xs">
+          <Link href="/listings" className="flex items-center gap-3 shrink-0">
+            <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-white font-bold text-xs">
               L
             </div>
-            <span className="font-medium">Linker</span>
+            <span className="font-medium text-foreground">Linker</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-4 text-sm min-w-0">
@@ -80,13 +78,13 @@ export function Navbar() {
         
         {/* Right side Desktop */}
         <div className="hidden sm:flex items-center gap-6">
-          <button onClick={toggleLocale} className="text-sm font-medium uppercase text-foreground-muted hover:text-foreground transition-colors">
-            {locale === "en" ? "EN / mk" : "en / MK"}
-          </button>
+          <div className="flex bg-surface-raised rounded-full p-0.5 border border-border">
+            <button onClick={() => { if (locale !== "mk") toggleLocale(); }} className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors ${locale === "mk" ? "bg-accent text-white shadow-sm" : "text-foreground-muted hover:text-foreground"}`}>MK</button>
+            <button onClick={() => { if (locale !== "en") toggleLocale(); }} className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors ${locale === "en" ? "bg-accent text-white shadow-sm" : "text-foreground-muted hover:text-foreground"}`}>EN</button>
+          </div>
           
           <Link href="/notifications" className="relative text-foreground-muted hover:text-foreground">
             <Bell size={20} />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-destructive rounded-full border border-background"></span>
           </Link>
           
           {user ? (
@@ -94,21 +92,21 @@ export function Navbar() {
               <DropdownMenuTrigger className="outline-none">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={user.avatar_url || ""} />
-                  <AvatarFallback className="bg-surface-raised text-xs">
+                  <AvatarFallback className="bg-surface-raised text-xs text-foreground font-medium">
                     {user.full_name?.charAt(0) || user.username.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 shadow-custom-dropdown border-border">
+              <DropdownMenuContent align="end" className="w-56 shadow-custom-dropdown border-border bg-surface">
                 <div className="px-2 py-1.5 flex flex-col">
-                  <span className="text-sm font-medium">{user.full_name || "User"}</span>
+                  <span className="text-sm font-medium text-foreground">{user.full_name || "User"}</span>
                   <span className="text-xs text-foreground-muted">@{user.username}</span>
                 </div>
-                <DropdownMenuSeparator className="bg-border-subtle" />
-                <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/profile/edit">Edit profile</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/profile/settings">Account settings</Link></DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border-subtle" />
+                <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuItem className="text-foreground hover:bg-surface-raised" asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
+                <DropdownMenuItem className="text-foreground hover:bg-surface-raised" asChild><Link href="/profile/edit">Edit profile</Link></DropdownMenuItem>
+                <DropdownMenuItem className="text-foreground hover:bg-surface-raised" asChild><Link href="/profile/settings">Account settings</Link></DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem onClick={signOut} className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer">
                   Sign out
                 </DropdownMenuItem>
@@ -123,9 +121,10 @@ export function Navbar() {
 
         {/* Mobile menu */}
         <div className="sm:hidden flex items-center gap-4">
-          <button onClick={toggleLocale} className="text-xs font-medium uppercase text-foreground-muted">
-            {locale}
-          </button>
+          <div className="flex bg-surface-raised rounded-full p-[1px] border border-border">
+            <button onClick={() => { if (locale !== "mk") toggleLocale(); }} className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors ${locale === "mk" ? "bg-accent text-white shadow-sm" : "text-foreground-muted"}`}>MK</button>
+            <button onClick={() => { if (locale !== "en") toggleLocale(); }} className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors ${locale === "en" ? "bg-accent text-white shadow-sm" : "text-foreground-muted"}`}>EN</button>
+          </div>
           <Sheet>
             <SheetTrigger asChild>
               <button className="text-foreground-muted">
@@ -139,12 +138,12 @@ export function Navbar() {
                     {link.label}
                   </Link>
                 ))}
-                <div className="h-px w-full bg-border-subtle my-2" />
+                <div className="h-px w-full bg-border my-2" />
                 {user ? (
                   <>
                     <Link href="/profile" className="text-lg font-medium text-foreground-muted hover:text-foreground">Profile</Link>
                     <Link href="/profile/edit" className="text-lg font-medium text-foreground-muted hover:text-foreground">Edit profile</Link>
-                    <button onClick={signOut} className="text-left text-lg font-medium text-destructive">Sign out</button>
+                    <button onClick={signOut} className="text-left text-lg font-medium text-destructive mt-4">Sign out</button>
                   </>
                 ) : (
                   <Link href="/auth/signin" className="text-lg font-medium text-foreground">Sign In</Link>

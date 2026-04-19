@@ -105,6 +105,14 @@ export async function middleware(request: NextRequest) {
     return redirectResponse;
   }
 
+  if (pathname === "/" && user) {
+    const localePrefix = currentLocale === defaultLocale ? '' : `/${currentLocale}`;
+    const redirectResponse = NextResponse.redirect(new URL(`${localePrefix}/listings`, request.url));
+    copyCookies(finalResponse, redirectResponse);
+    redirectResponse.headers.set("x-user-role", role);
+    return redirectResponse;
+  }
+
   if ((pathname === "/admin" || pathname.startsWith("/admin/")) && role !== "admin") {
     const localePrefix = currentLocale === defaultLocale ? '' : `/${currentLocale}`;
     const redirectResponse = NextResponse.redirect(new URL(`${localePrefix}/`, request.url));
