@@ -95,44 +95,87 @@ export default function BrowseListingsPage() {
   );
 
   return (
-    <div className="flex-1 w-full max-w-7xl mx-auto px-4 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Discover Opportunities</h1>
-        <p className="text-foreground-muted mt-1">Browse open positions from approved companies.</p>
-      </div>
-      <div className="flex gap-3 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted" />
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by title, company, skill..." className="pl-9 bg-surface border-border h-11 shadow-card" />
+    <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-10 lg:gap-14 items-start justify-center">
+        
+        {/* Left Sticky Sidebar Filter */}
+        <div className="hidden md:block w-60 lg:w-64 shrink-0 sticky top-24 self-start bg-transparent">
+          <FilterPanel />
         </div>
-        <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className={`h-11 gap-2 md:hidden ${hasFilters ? "border-accent text-accent" : ""}`}>
-          <SlidersHorizontal size={16} /> Filters
-        </Button>
-      </div>
-      <div className="flex gap-8">
-        <div className="hidden md:block w-52 shrink-0"><FilterPanel /></div>
-        {showFilters && <div className="md:hidden bg-surface border border-border rounded-xl p-5 mb-4 w-full"><FilterPanel /></div>}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-foreground-muted mb-4">
-            {loading ? "Loading..." : `${filtered.length} listing${filtered.length !== 1 ? "s" : ""} found`}
-          </p>
-          {loading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {[...Array(6)].map((_, i) => <div key={i} className="h-52 bg-surface border border-border rounded-xl animate-pulse" />)}
+
+        {/* Central Feed */}
+        <div className="flex-1 w-full max-w-2xl min-w-0 flex flex-col">
+          {/* Header & Search */}
+          <div className="mb-6 space-y-4">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Opportunities Feed</h1>
+              <p className="text-sm text-foreground-muted mt-1">Discover your next career leap.</p>
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="bg-surface border border-border rounded-xl p-12 text-center shadow-card">
-              <p className="text-foreground-muted">No listings match your filters.</p>
-              {hasFilters && <button onClick={clearFilters} className="mt-3 text-sm font-medium text-accent">Clear filters</button>}
+
+            <div className="flex gap-3">
+              <div className="relative flex-1 group">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted group-focus-within:text-accent transition-colors" />
+                <Input 
+                  value={query} 
+                  onChange={(e) => setQuery(e.target.value)} 
+                  placeholder="Search titles, companies, skills..." 
+                  className="pl-10 bg-surface border-border h-12 shadow-sm rounded-xl focus-visible:ring-accent transition-all text-sm" 
+                />
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFilters(!showFilters)} 
+                className={`h-12 rounded-xl md:hidden px-4 ${hasFilters ? "border-accent text-accent bg-accent/5" : "border-border text-foreground-muted bg-surface"}`}
+              >
+                <SlidersHorizontal size={16} className="mr-2" /> Filters
+              </Button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {filtered.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} onClick={() => router.push(`/listings/${listing.id}`)} />
-              ))}
+          </div>
+          
+          {/* Mobile Filter Panel */}
+          {showFilters && (
+            <div className="md:hidden bg-surface border border-border rounded-xl p-5 mb-6 w-full shadow-sm animate-in fade-in slide-in-from-top-2">
+              <FilterPanel />
             </div>
           )}
+
+          {/* Feed Content */}
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">
+                {loading ? "Refreshing..." : `${filtered.length} Result${filtered.length !== 1 ? "s" : ""}`}
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-48 bg-surface border border-border rounded-2xl animate-pulse" />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="bg-transparent border border-dashed border-border rounded-2xl p-12 text-center mt-2">
+                <div className="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center mx-auto mb-4 text-foreground-faint">
+                  <Search size={20} />
+                </div>
+                <h3 className="font-semibold text-base mb-1 text-foreground">No matches found</h3>
+                <p className="text-sm text-foreground-muted max-w-sm mx-auto mb-4">We couldn't find any listings matching your current filters.</p>
+                {hasFilters && (
+                  <Button onClick={clearFilters} variant="outline" className="rounded-full shadow-sm">
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-5 pb-16">
+                {filtered.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} onClick={() => router.push(`/listings/${listing.id}`)} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   );
