@@ -22,13 +22,13 @@ export default function NotificationsPage() {
   useEffect(() => { load(); }, []);
 
   const markRead = async (id: string) => {
-    await fetch(`/api/notifications/${id}/read`, { method: "POST" });
+    await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
     setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, is_read: true } : n));
     setUnreadCount((c) => Math.max(0, c - 1));
   };
 
   const markAllRead = async () => {
-    await fetch("/api/notifications/read-all", { method: "POST" });
+    await fetch("/api/notifications/read-all", { method: "PATCH" });
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     setUnreadCount(0);
     toast.success("All notifications marked as read.");

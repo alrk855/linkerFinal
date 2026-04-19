@@ -54,6 +54,14 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
 
   if (!code) {
+    // If this looks like an Azure verification callback that failed, send back to
+    // verify-student rather than the generic sign-in error screen.
+    const queryProvider = request.nextUrl.searchParams.get("provider");
+    if (queryProvider === "azure_ad" || queryProvider === "azure") {
+      const dest = new URL("/auth/verify-student", appOrigin);
+      dest.searchParams.set("error", "azure_email_failed");
+      return clearFlowCookies(NextResponse.redirect(dest));
+    }
     return clearFlowCookies(
       NextResponse.redirect(signinErrorUrl(appOrigin, "missing_code"))
     );
@@ -171,10 +179,10 @@ export async function GET(request: NextRequest) {
         await svc.from("profiles").update({ role: requestedRole }).eq("id", data.user.id);
       }
 
-      const profile = existing || await getProfileById(svc, data.user.id).catch(() => null);
-      redirectPath = (profile?.role === "student" && !profile.is_verified_student)
-        ? "/auth/verify-student"
-        : "/profile/setup";
+      // For new Google signups: go to profile setup (they can verify via Microsoft later).
+      // For returning Google users: go to dashboard — never loop back to verify-student
+      // since they're already signed in and verification is optional post-signup.
+      redirectPath = !existing ? "/profile/setup" : "/dashboard";
     }
   } catch (e) {
     console.error("Post-exchange logic failed:", e);

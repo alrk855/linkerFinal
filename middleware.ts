@@ -13,7 +13,7 @@ const defaultLocale = 'en';
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'as-needed' // or 'always'
+  localePrefix: 'never',
 });
 
 function isProtectedRoute(pathname: string): boolean {

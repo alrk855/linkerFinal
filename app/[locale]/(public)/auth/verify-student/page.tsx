@@ -1,19 +1,31 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Phone, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export default function VerifyStudentPage() {
+function VerifyStudentContent() {
   const t = useTranslations("Auth");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [view, setView] = useState<"ms" | "phone" | "otp">("ms");
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "azure_email_failed") {
+      toast.error("Microsoft sign-in failed: could not retrieve your university email. Please ensure you are signing in with your UKIM Microsoft account.");
+    } else if (error === "missing_state") {
+      toast.error("Verification session expired. Please try again.");
+    } else if (error === "invalid_ukim_email") {
+      toast.error("That Microsoft account does not appear to be a UKIM university email.");
+    }
+  }, [searchParams]);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   
   const handleMsConnect = () => {
@@ -138,5 +150,13 @@ export default function VerifyStudentPage() {
 
       </Card>
     </div>
+  );
+}
+
+export default function VerifyStudentPage() {
+  return (
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center p-12"><div className="w-8 h-8 rounded-full border-2 border-accent border-r-transparent animate-spin" /></div>}>
+      <VerifyStudentContent />
+    </Suspense>
   );
 }

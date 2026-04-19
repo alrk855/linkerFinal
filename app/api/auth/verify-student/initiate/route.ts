@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       provider: "azure",
       options: {
         redirectTo: callbackUrl.toString(),
-        skipBrowserRedirect: true,
+        scopes: "openid email profile",
       },
     });
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       provider: "azure",
       options: {
         redirectTo: callbackUrl.toString(),
-        skipBrowserRedirect: true,
+        scopes: "openid email profile",
       },
     });
 
