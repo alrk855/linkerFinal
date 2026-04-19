@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,16 +52,52 @@ export default function ProfileEditPage() {
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      full_name: user?.full_name || "",
-      username: user?.username || "",
+      full_name: "",
+      username: "",
       bio: "",
     },
   });
 
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/profile/me");
+        if (!res.ok) return;
+        const data = await res.json();
+        const p = data.profile || data;
+        const sp = p.student_profile || {};
+        const cp = p.company_profile || {};
+        form.reset({
+          full_name: p.full_name || "",
+          username: p.username || "",
+          bio: p.bio || "",
+          phone: p.phone || "",
+          faculty: sp.faculty || "",
+          year_of_study: sp.year_of_study || "",
+          degree_type: sp.degree_type || "",
+          graduation_year: sp.graduation_year || "",
+          experience_level: sp.experience_level || "",
+          focus_area: sp.focus_area || "",
+          company_name: cp.company_name || "",
+          company_description: cp.company_description || "",
+          industry: cp.industry || "",
+          size_range: cp.size_range || "",
+          location: cp.location || "",
+          github_url: p.github_url || "",
+          linkedin_url: p.linkedin_url || "",
+          portfolio_url: p.portfolio_url || "",
+          website_url: p.website_url || cp.company_website || "",
+        });
+      } catch {
+        // ignore, form will use empty defaults
+      }
+    }
+    if (!isLoading) loadProfile();
+  }, [isLoading]);
+
   const onSubmit = async (values: z.infer<typeof profileSchema>) => {
     setLoading(true);
     try {
-      // Mock API call to PATCH /api/profile/me
       const res = await fetch("/api/profile/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

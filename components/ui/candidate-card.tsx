@@ -1,83 +1,125 @@
 import { cn } from "@/lib/utils";
 import { AnonymousAvatar } from "@/components/ui/anonymous-avatar";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
-import { SkillTag } from "@/components/ui/skill-tag";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 
 interface CandidateCardProps {
   candidate: any;
   onAcknowledge?: () => void;
+  loading?: boolean;
   className?: string;
 }
 
-export function CandidateCard({ candidate, onAcknowledge, className }: CandidateCardProps) {
-  // Safe defaults
+const FOCUS_COLORS: Record<string, string> = {
+  Frontend: "bg-blue-50 text-blue-700 border-blue-200",
+  Backend: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Fullstack: "bg-violet-50 text-violet-700 border-violet-200",
+  Mobile: "bg-orange-50 text-orange-700 border-orange-200",
+  DevOps: "bg-slate-50 text-slate-700 border-slate-200",
+  Data: "bg-amber-50 text-amber-700 border-amber-200",
+  Security: "bg-red-50 text-red-700 border-red-200",
+};
+
+export function CandidateCard({ candidate, onAcknowledge, loading, className }: CandidateCardProps) {
   const skills = candidate.skills || [];
-  
+  const focusColor = FOCUS_COLORS[candidate.focus_area] || "bg-surface-raised text-foreground-muted border-border";
+  const matchScore = candidate.match_score ?? null;
+
   return (
-    <div className={cn("bg-surface border border-border rounded-xl p-5 flex flex-col gap-4", className)}>
-      {/* Top Row */}
-      <div className="flex items-center gap-3">
+    <div className={cn(
+      "bg-surface border border-border rounded-xl p-5 flex flex-col gap-4 shadow-card hover:shadow-card-hover hover:border-accent/30 transition-all duration-150",
+      className
+    )}>
+      {/* Header */}
+      <div className="flex items-start gap-3">
         <AnonymousAvatar size="md" />
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground">Anonymous Student</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-foreground">Anonymous Student</span>
             {candidate.is_verified_student && <VerifiedBadge size="sm" />}
           </div>
-          <span className="text-sm text-foreground-muted">
-            {candidate.faculty || "Unknown Faculty"} • {candidate.year_of_study ? `Year ${candidate.year_of_study}` : "Graduated"} • {candidate.degree_type || "BSc"}
-          </span>
+          <div className="flex items-center gap-1.5 text-sm text-foreground-muted mt-0.5">
+            <GraduationCap size={13} />
+            <span>
+              {candidate.faculty || "Unknown"}
+              {candidate.year_of_study ? ` · Year ${candidate.year_of_study}` : ""}
+              {candidate.degree_type ? ` · ${candidate.degree_type}` : ""}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Badges */}
-      <div className="flex flex-wrap gap-2 text-xs font-medium">
+      <div className="flex flex-wrap gap-2">
         {candidate.focus_area && (
-          <span className="bg-surface-raised border border-border text-foreground px-2 py-1 rounded-md">
+          <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border", focusColor)}>
             {candidate.focus_area}
           </span>
         )}
         {candidate.experience_level && (
-          <span className="bg-surface-raised border border-border text-foreground px-2 py-1 rounded-md">
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-surface-raised border border-border text-foreground-muted">
             {candidate.experience_level}
           </span>
         )}
       </div>
 
-      {/* Skill Match Indicator - Mocked for visual */}
-      <div className="space-y-1.5 mt-2">
-        <div className="flex justify-between items-center text-xs">
-          <span className="text-foreground-muted">Skill match</span>
-          <span className="text-foreground font-medium">8 / 12 required</span>
+      {/* Skill match bar (if score provided) */}
+      {matchScore !== null && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-foreground-muted font-medium">Skill match</span>
+            <span className={cn(
+              "font-bold",
+              matchScore >= 75 ? "text-success" : matchScore >= 50 ? "text-accent" : "text-foreground-muted"
+            )}>
+              {matchScore}%
+            </span>
+          </div>
+          <div className="h-1.5 bg-surface-raised rounded-full overflow-hidden">
+            <div
+              className={cn(
+                "h-full rounded-full transition-all",
+                matchScore >= 75 ? "bg-success" : matchScore >= 50 ? "bg-accent" : "bg-border"
+              )}
+              style={{ width: `${matchScore}%` }}
+            />
+          </div>
         </div>
-        <div className="h-1 bg-surface-raised rounded-full overflow-hidden">
-          <div className="h-full bg-accent" style={{ width: '66%' }} />
-        </div>
-      </div>
+      )}
 
       {/* Skills */}
-      <div className="flex flex-wrap gap-1.5 mt-2">
-        {skills.slice(0, 6).map((skill: any) => (
-          <SkillTag key={skill.id} name={skill.name} />
-        ))}
-        {skills.length > 6 && (
-          <span className="text-xs font-mono text-foreground-faint py-0.5 px-1">+{skills.length - 6} more</span>
-        )}
-      </div>
-
-      {/* Bio excerpt */}
-      <p className="text-sm text-foreground-muted line-clamp-2 mt-2">
-        {candidate.bio || "This student hasn't written a bio yet, but their skills indicate a strong foundation in software engineering..."}
-      </p>
+      {skills.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {skills.slice(0, 5).map((skill: any) => (
+            <span
+              key={skill.id || skill.name}
+              className="text-xs px-2 py-0.5 rounded-md font-medium border"
+              style={{
+                backgroundColor: "hsl(224 90% 56% / 0.07)",
+                color: "hsl(224 90% 44%)",
+                borderColor: "hsl(224 90% 56% / 0.2)",
+              }}
+            >
+              {skill.name}
+            </span>
+          ))}
+          {skills.length > 5 && (
+            <span className="text-xs text-foreground-faint px-1 py-0.5">
+              +{skills.length - 5}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Action */}
-      <div className="mt-auto pt-4 flex gap-3">
-        <Button 
+      <div className="mt-auto pt-3 border-t border-border">
+        <Button
           onClick={onAcknowledge}
-          className="w-full bg-accent hover:bg-accent-hover text-background font-medium"
+          disabled={loading}
+          className="w-full bg-accent hover:bg-accent-hover text-white font-medium h-9"
         >
-          Acknowledge
+          {loading ? "Sending..." : "Send Acknowledgment"}
         </Button>
       </div>
     </div>

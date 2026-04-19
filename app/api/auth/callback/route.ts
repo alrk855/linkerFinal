@@ -115,7 +115,30 @@ export async function GET(request: NextRequest) {
           is_verified_student: true,
           ukim_email: azureEmail,
         }).eq("id", targetUserId);
-        redirectPath = "/profile/edit?verified=true";
+
+        // Restore the original student's session via a magic link so they
+        // are not left logged in as the Azure identity.
+        try {
+          const { data: authUserData } = await svc.auth.admin.getUserById(targetUserId);
+          const originalEmail = authUserData?.user?.email;
+          if (originalEmail) {
+            const { data: linkData } = await svc.auth.admin.generateLink({
+              type: "magiclink",
+              email: originalEmail,
+              options: { redirectTo: `${appOrigin}/profile/setup?verified=true` },
+            });
+            const actionLink = (linkData as any)?.properties?.action_link as string | undefined;
+            if (actionLink) {
+              return clearFlowCookies(NextResponse.redirect(actionLink));
+            }
+          }
+        } catch (linkErr) {
+          console.error("Magic link generation failed:", linkErr);
+        }
+        // Fallback: let user sign in manually with a success toast trigger
+        return clearFlowCookies(
+          NextResponse.redirect(new URL("/auth/signin?verified=true", appOrigin))
+        );
       }
     } else if (provider === "google") {
       const svc = createServiceClient();
@@ -151,7 +174,7 @@ export async function GET(request: NextRequest) {
       const profile = existing || await getProfileById(svc, data.user.id).catch(() => null);
       redirectPath = (profile?.role === "student" && !profile.is_verified_student)
         ? "/auth/verify-student"
-        : "/profile/edit";
+        : "/profile/setup";
     }
   } catch (e) {
     console.error("Post-exchange logic failed:", e);
