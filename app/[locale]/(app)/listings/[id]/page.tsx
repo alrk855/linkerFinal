@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/providers/auth-provider";
 import { SkillTag } from "@/components/ui/skill-tag";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,15 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
       <div className="bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-card">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 text-accent font-bold text-xl">
-            {company?.logo_url ? <img src={company.logo_url} alt="" className="w-full h-full object-cover rounded-xl" /> : company?.company_name?.charAt(0) || "?"}
+            {company?.logo_url ? (
+              <Image
+                src={company.logo_url}
+                alt={company?.company_name || "Company logo"}
+                width={56}
+                height={56}
+                className="w-full h-full object-cover rounded-xl"
+              />
+            ) : company?.company_name?.charAt(0) || "?"}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold tracking-tight">{listing.title}</h1>

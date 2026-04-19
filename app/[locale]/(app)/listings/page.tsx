@@ -159,7 +159,7 @@ export default function BrowseListingsPage() {
                   <Search size={20} />
                 </div>
                 <h3 className="font-semibold text-base mb-1 text-foreground">No matches found</h3>
-                <p className="text-sm text-foreground-muted max-w-sm mx-auto mb-4">We couldn't find any listings matching your current filters.</p>
+                <p className="text-sm text-foreground-muted max-w-sm mx-auto mb-4">We couldn&apos;t find any listings matching your current filters.</p>
                 {hasFilters && (
                   <Button onClick={clearFilters} variant="outline" className="rounded-full shadow-sm">
                     Clear all filters

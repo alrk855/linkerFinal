@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,37 @@ import { toast } from "sonner";
 
 export default function AccountSettingsPage() {
   const { user, isLoading, signOut } = useAuth();
+  const [ukimEmail, setUkimEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProfileConnectionInfo() {
+      if (!user) {
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/profile/me");
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+        if (!cancelled) {
+          setUkimEmail(data?.profile?.ukim_email ?? null);
+        }
+      } catch {
+        // Keep this non-blocking, settings page should still render without this field.
+      }
+    }
+
+    loadProfileConnectionInfo();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   if (isLoading) {
     return (
@@ -46,13 +78,45 @@ export default function AccountSettingsPage() {
             <Input id="account-username" value={user.username} readOnly className="bg-surface-raised border-border text-foreground-muted" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="account-email">Email</Label>
-            <Input id="account-email" value={user.email} readOnly className="bg-surface-raised border-border text-foreground-muted" />
+            <Label htmlFor="account-primary">Primary Account</Label>
+            <Input id="account-primary" value={user.email} readOnly className="bg-surface-raised border-border text-foreground-muted" />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="account-role">Role</Label>
-            <Input id="account-role" value={user.role} readOnly className="bg-surface-raised border-border text-foreground-muted" />
-          </div>
+          {user.role === "student" ? (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="account-ms-status">Microsoft Student Verification</Label>
+                <Input
+                  id="account-ms-status"
+                  value={user.is_verified_student ? "Verified" : "Not verified"}
+                  readOnly
+                  className="bg-surface-raised border-border text-foreground-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="account-ms-email">Connected Microsoft Email</Label>
+                <Input
+                  id="account-ms-email"
+                  value={ukimEmail || "Not connected"}
+                  readOnly
+                  className="bg-surface-raised border-border text-foreground-muted"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="bg-background border-border"
+                onClick={() => {
+                  window.location.href = "/auth/verify-student";
+                }}
+              >
+                {ukimEmail ? "Reconnect Microsoft Account" : "Connect Microsoft Account"}
+              </Button>
+            </>
+          ) : (
+            <p className="text-sm text-foreground-muted">
+              Microsoft student verification is available for student accounts only.
+            </p>
+          )}
         </CardContent>
       </Card>
 

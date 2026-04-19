@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { MapPin, Users, Zap } from "lucide-react";
+import Image from "next/image";
 
 interface ListingCardProps {
   listing: any;
@@ -46,9 +47,11 @@ export function ListingCard({ listing, onClick, className }: ListingCardProps) {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           {company.logo_url ? (
-            <img
+            <Image
               src={company.logo_url}
               alt={company.company_name}
+              width={40}
+              height={40}
               className="w-10 h-10 rounded-xl object-cover shrink-0 border border-border shadow-sm"
             />
           ) : (

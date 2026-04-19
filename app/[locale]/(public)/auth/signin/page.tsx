@@ -70,7 +70,7 @@ export default function SignInPage() {
       // Hard refresh to ensure cookies from the response are picked up
       // before navigating to the protected route
       router.refresh();
-      window.location.href = "/listings";
+      window.location.href = "/dashboard";
     } catch (error) {
       toast.error("Failed to sign in. Please check your credentials.");
       console.error(error);

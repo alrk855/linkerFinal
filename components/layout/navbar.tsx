@@ -37,11 +37,20 @@ export function Navbar() {
     router.push(newPath);
   };
 
-  const navLinks = [
-    { href: "/listings", label: "Listings" },
-    { href: "/company/discover", label: "Discover", role: "company" },
-    { href: "/acknowledgments", label: "Inbox", role: "student" },
-  ];
+  const logoHref = user ? "/dashboard" : "/";
+
+  const navLinks = user?.role === "company"
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/company/listings", label: "My Listings" },
+        { href: "/company/discover", label: "Candidates" },
+        { href: "/acknowledgments", label: "Inbox" },
+      ]
+    : [
+        { href: "/dashboard", label: "Dashboard", role: "student" },
+        { href: "/listings", label: "Listings" },
+        { href: "/acknowledgments", label: "Inbox", role: "student" },
+      ];
 
   const visibleLinks = navLinks.filter(l => !l.role || l.role === user?.role);
 
@@ -50,7 +59,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8 min-w-0">
           {/* Left: Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
+          <Link href={logoHref} className="flex items-center gap-3 shrink-0">
             <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-white font-bold text-xs">
               L
             </div>

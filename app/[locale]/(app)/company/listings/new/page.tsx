@@ -15,9 +15,9 @@ import { useRouter } from "next/navigation";
 const listingSchema = z.object({
   title: z.string().min(5, "Title is too short").max(100, "Title is too long"),
   description: z.string().min(50, "Please provide a detailed description (min 50 chars)"),
-  listing_type: z.enum(["Internship", "Part-time", "Full-time"]),
+  listing_type: z.enum(["internship", "part_time", "full_time"]),
   focus_area: z.string().min(1, "Select a focus area"),
-  experience_level: z.enum(["No experience", "Junior", "Mid-level", "Senior"]),
+  experience_level: z.enum(["no_experience", "junior", "mid", "senior"]),
   total_slots: z.coerce.number().min(1, "Must have at least 1 slot").max(20, "Maximum 20 slots"),
 });
 
@@ -29,9 +29,9 @@ export default function NewListingPage() {
     defaultValues: {
       title: "",
       description: "",
-      listing_type: "Internship",
+      listing_type: "internship",
       focus_area: "",
-      experience_level: "Junior",
+      experience_level: "junior",
       total_slots: 1,
     },
   });
@@ -108,13 +108,17 @@ export default function NewListingPage() {
                       <FormLabel>Role Type</FormLabel>
                       <FormControl>
                         <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col gap-3">
-                          {(["Internship", "Part-time", "Full-time"] as const).map((t) => (
+                          {[
+                            { value: "internship", label: "Internship" },
+                            { value: "part_time", label: "Part-time" },
+                            { value: "full_time", label: "Full-time" },
+                          ].map((t) => (
                             <FormItem
-                              key={t}
+                              key={t.value}
                               className="flex items-center space-x-2 space-y-0 bg-background border border-border px-4 py-3 rounded-md"
                             >
-                              <FormControl><RadioGroupItem value={t} /></FormControl>
-                              <FormLabel className="font-normal cursor-pointer w-full">{t}</FormLabel>
+                              <FormControl><RadioGroupItem value={t.value} /></FormControl>
+                              <FormLabel className="font-normal cursor-pointer w-full">{t.label}</FormLabel>
                             </FormItem>
                           ))}
                         </RadioGroup>
@@ -132,13 +136,18 @@ export default function NewListingPage() {
                       <FormLabel>Experience Level</FormLabel>
                       <FormControl>
                         <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col gap-3">
-                          {(["No experience", "Junior", "Mid-level", "Senior"] as const).map((t) => (
+                          {[
+                            { value: "no_experience", label: "No experience" },
+                            { value: "junior", label: "Junior" },
+                            { value: "mid", label: "Mid-level" },
+                            { value: "senior", label: "Senior" },
+                          ].map((t) => (
                             <FormItem
-                              key={t}
+                              key={t.value}
                               className="flex items-center space-x-2 space-y-0 bg-background border border-border px-4 py-3 rounded-md"
                             >
-                              <FormControl><RadioGroupItem value={t} /></FormControl>
-                              <FormLabel className="font-normal cursor-pointer w-full">{t}</FormLabel>
+                              <FormControl><RadioGroupItem value={t.value} /></FormControl>
+                              <FormLabel className="font-normal cursor-pointer w-full">{t.label}</FormLabel>
                             </FormItem>
                           ))}
                         </RadioGroup>
@@ -162,8 +171,16 @@ export default function NewListingPage() {
                           className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
                         >
                           <option value="" disabled>Select area</option>
-                          {["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data", "Security", "Other"].map((a) => (
-                            <option key={a} value={a}>{a}</option>
+                          {[
+                            { value: "frontend", label: "Frontend" },
+                            { value: "backend", label: "Backend" },
+                            { value: "fullstack", label: "Fullstack" },
+                            { value: "mobile", label: "Mobile" },
+                            { value: "devops", label: "DevOps" },
+                            { value: "data", label: "Data" },
+                            { value: "other", label: "Other" },
+                          ].map((a) => (
+                            <option key={a.value} value={a.value}>{a.label}</option>
                           ))}
                         </select>
                       </FormControl>

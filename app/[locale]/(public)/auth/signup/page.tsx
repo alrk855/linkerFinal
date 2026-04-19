@@ -85,11 +85,7 @@ function SignupFormContent() {
         throw new Error(body?.error?.message || "Failed to sign up");
       }
       toast.success("Account created successfully");
-      if (role === "student") {
-        window.location.href = "/auth/verify-student";
-      } else {
-        window.location.href = "/profile/setup";
-      }
+      window.location.href = "/profile/setup";
     } catch (err: any) {
       toast.error(err?.message || "Signup failed");
     }

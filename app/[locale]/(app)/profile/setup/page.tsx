@@ -20,10 +20,10 @@ const studentSchema = z.object({
   full_name: z.string().min(2, "Full name required"),
   bio: z.string().max(200).optional(),
   faculty: z.string().optional(),
-  degree_type: z.string().optional(),
+  degree_type: z.enum(["bachelor", "master", "phd"]).optional(),
   year_of_study: z.string().optional(),
-  experience_level: z.string().optional(),
-  focus_area: z.string().optional(),
+  experience_level: z.enum(["no_experience", "junior", "mid", "senior"]).optional(),
+  focus_area: z.enum(["frontend", "backend", "fullstack", "mobile", "devops", "data", "other"]).optional(),
   github_url: z.string().url().optional().or(z.literal("")),
   linkedin_url: z.string().url().optional().or(z.literal("")),
   portfolio_url: z.string().url().optional().or(z.literal("")),
@@ -34,13 +34,26 @@ const companySchema = z.object({
   company_name: z.string().min(2, "Company name required"),
   company_description: z.string().max(400).optional(),
   industry: z.string().optional(),
-  size_range: z.string().optional(),
+  size_range: z.enum(["1-10", "11-50", "51-200", "201-1000", "1000+"]).optional(),
   location: z.string().optional(),
-  website_url: z.string().url().optional().or(z.literal("")),
+  company_website: z.string().url().optional().or(z.literal("")),
 });
 
 const STUDENT_STEPS = ["Welcome", "Academic", "Focus & Skills", "Links"];
 const COMPANY_STEPS = ["Welcome", "Company Info", "Presence"];
+
+function asOptionalString(value?: string) {
+  const trimmed = (value || "").trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function asOptionalNumber(value?: string) {
+  if (!value || value.trim() === "") {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isInteger(parsed) ? parsed : null;
+}
 
 export default function ProfileSetupPage() {
   const { user, isLoading } = useAuth();
@@ -61,7 +74,7 @@ export default function ProfileSetupPage() {
       faculty: "",
       degree_type: "bachelor",
       year_of_study: "",
-      experience_level: "none",
+      experience_level: "no_experience",
       focus_area: "",
       github_url: "",
       linkedin_url: "",
@@ -71,7 +84,7 @@ export default function ProfileSetupPage() {
       industry: "",
       size_range: "",
       location: "",
-      website_url: "",
+      company_website: "",
     },
   });
 
@@ -79,15 +92,39 @@ export default function ProfileSetupPage() {
     if (user?.full_name) {
       form.setValue("full_name", user.full_name);
     }
-  }, [user]);
+  }, [user, form]);
 
   const saveAndFinish = async (values: any) => {
     setSaving(true);
     try {
+      const payload: Record<string, unknown> = {
+        full_name: values.full_name.trim(),
+      };
+
+      if (isStudent) {
+        payload.bio = asOptionalString(values.bio);
+        payload.short_description = asOptionalString(values.bio);
+        payload.faculty = asOptionalString(values.faculty);
+        payload.degree_type = asOptionalString(values.degree_type);
+        payload.year_of_study = asOptionalNumber(values.year_of_study);
+        payload.experience_level = asOptionalString(values.experience_level);
+        payload.focus_area = asOptionalString(values.focus_area);
+        payload.github_url = asOptionalString(values.github_url);
+        payload.linkedin_url = asOptionalString(values.linkedin_url);
+        payload.portfolio_url = asOptionalString(values.portfolio_url);
+      } else {
+        payload.company_name = asOptionalString(values.company_name);
+        payload.company_description = asOptionalString(values.company_description);
+        payload.industry = asOptionalString(values.industry);
+        payload.size_range = asOptionalString(values.size_range);
+        payload.location = asOptionalString(values.location);
+        payload.company_website = asOptionalString(values.company_website);
+      }
+
       const res = await fetch("/api/profile/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Failed to save");
       toast.success("Profile saved! Welcome to Linker.");
@@ -218,10 +255,10 @@ export default function ProfileSetupPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="finki">FINKI</SelectItem>
-                          <SelectItem value="feit">FEIT</SelectItem>
-                          <SelectItem value="mashinski">Mechanical Eng.</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="FINKI">FINKI</SelectItem>
+                          <SelectItem value="FEIT">FEIT</SelectItem>
+                          <SelectItem value="FCSE">FCSE</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -239,7 +276,6 @@ export default function ProfileSetupPage() {
                           {["1", "2", "3", "4", "5"].map(y => (
                             <SelectItem key={y} value={y}>Year {y}</SelectItem>
                           ))}
-                          <SelectItem value="graduated">Graduated</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -280,9 +316,13 @@ export default function ProfileSetupPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data", "Security", "Other"].map(f => (
-                          <SelectItem key={f} value={f}>{f}</SelectItem>
-                        ))}
+                        <SelectItem value="frontend">Frontend</SelectItem>
+                        <SelectItem value="backend">Backend</SelectItem>
+                        <SelectItem value="fullstack">Fullstack</SelectItem>
+                        <SelectItem value="mobile">Mobile</SelectItem>
+                        <SelectItem value="devops">DevOps</SelectItem>
+                        <SelectItem value="data">Data</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -294,9 +334,9 @@ export default function ProfileSetupPage() {
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="grid grid-cols-2 gap-3">
                         {[
-                          { val: "none", label: "No experience", desc: "Looking for first role" },
+                          { val: "no_experience", label: "No experience", desc: "Looking for first role" },
                           { val: "junior", label: "Junior", desc: "0–2 years" },
-                          { val: "mid", label: "Mid-level", desc: "2–4 years" },
+                          { val: "mid", label: "Mid-level", desc: "2-4 years" },
                           { val: "senior", label: "Senior", desc: "4+ years" },
                         ].map(lvl => (
                           <FormItem key={lvl.val} className="flex flex-col items-start space-y-0 bg-background border border-border p-4 rounded-lg cursor-pointer group">
@@ -379,9 +419,11 @@ export default function ProfileSetupPage() {
                           <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Size" /></SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {["1–10", "11–50", "51–200", "201–500", "500+"].map(s => (
-                            <SelectItem key={s} value={s}>{s} employees</SelectItem>
-                          ))}
+                          <SelectItem value="1-10">1-10 employees</SelectItem>
+                          <SelectItem value="11-50">11-50 employees</SelectItem>
+                          <SelectItem value="51-200">51-200 employees</SelectItem>
+                          <SelectItem value="201-1000">201-1000 employees</SelectItem>
+                          <SelectItem value="1000+">1000+ employees</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -402,20 +444,11 @@ export default function ProfileSetupPage() {
             {!isStudent && step === 2 && (
               <div className="space-y-4">
                 <p className="text-sm text-foreground-muted">Help students learn about your company.</p>
-                <FormField control={form.control} name="website_url" render={({ field }) => (
+                <FormField control={form.control} name="company_website" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Company website</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="https://yourcompany.com" className="bg-background border-border" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="linkedin_url" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>LinkedIn page</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://linkedin.com/company/..." className="bg-background border-border" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

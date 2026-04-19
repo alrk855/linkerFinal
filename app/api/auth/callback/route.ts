@@ -30,8 +30,16 @@ function parseOAuthState(rawState: string | null): OAuthState {
 
 function isUkimEmail(email: string): boolean {
   const n = email.toLowerCase();
-  return n.endsWith("@ukim.edu.mk") || n.endsWith(".ukim.edu.mk") ||
-    (n.includes("@") && (n.split("@")[1]?.endsWith(".ukim.edu.mk") ?? false));
+  if (!n.includes("@")) {
+    return false;
+  }
+
+  const domain = n.split("@")[1] || "";
+  return (
+    domain.endsWith("ukim.edu.mk") ||
+    domain.endsWith("ukim.mk") ||
+    domain === "students.finki.ukim.mk"
+  );
 }
 
 function clearFlowCookies(response: NextResponse) {

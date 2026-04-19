@@ -16,7 +16,7 @@ export default function WaitlistPage() {
           <div className="w-12 h-12 bg-surface-raised rounded-lg flex items-center justify-center mb-4 mx-auto text-foreground">
             <Mail size={24} />
           </div>
-          <CardTitle className="text-2xl font-semibold tracking-tight">You're on the list</CardTitle>
+          <CardTitle className="text-2xl font-semibold tracking-tight">You&apos;re on the list</CardTitle>
           <CardDescription className="text-foreground-muted mt-2 text-base leading-relaxed">
             {t("waitlist_msg")}
           </CardDescription>

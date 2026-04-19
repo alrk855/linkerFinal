@@ -8,7 +8,7 @@ const PROTECTED_PREFIXES = ["/dashboard", "/profile", "/listings", "/company", "
 
 // Internationalization definition
 const locales = ['en', 'mk'];
-const defaultLocale = 'en';
+const defaultLocale = 'mk';
 
 const intlMiddleware = createMiddleware({
   locales,
@@ -107,7 +107,7 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/" && user) {
     const localePrefix = currentLocale === defaultLocale ? '' : `/${currentLocale}`;
-    const redirectResponse = NextResponse.redirect(new URL(`${localePrefix}/listings`, request.url));
+    const redirectResponse = NextResponse.redirect(new URL(`${localePrefix}/dashboard`, request.url));
     copyCookies(finalResponse, redirectResponse);
     redirectResponse.headers.set("x-user-role", role);
     return redirectResponse;

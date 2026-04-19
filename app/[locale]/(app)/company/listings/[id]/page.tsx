@@ -11,8 +11,9 @@ import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
 const STATUS_STYLES: Record<string, string> = {
-  pending_review: "bg-warning/10 text-warning border-warning/20",
-  accepted: "bg-success/10 text-success border-success/20",
+  pending: "bg-warning/10 text-warning border-warning/20",
+  reviewed: "bg-accent/10 text-accent border-accent/20",
+  acknowledged: "bg-success/10 text-success border-success/20",
   rejected: "bg-destructive/10 text-destructive border-destructive/20",
   withdrawn: "bg-surface-raised text-foreground-faint border-border",
 };
@@ -177,24 +178,26 @@ export default function CompanyListingDetailPage({ params }: { params: { id: str
                   </TableRow>
                 ) : (
                   applications.map((app) => {
-                    const isRevealed = app.identity_revealed || app.status === "accepted";
+                    const card = app.student_card || {};
                     return (
                       <TableRow key={app.id} className="hover:bg-surface-raised transition-colors">
                         <TableCell className="px-5 py-4">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={isRevealed ? "font-medium text-foreground cursor-pointer hover:underline" : "text-foreground-muted"}
-                              onClick={() => isRevealed && app.candidate_username && router.push(`/profile/${app.candidate_username}`)}
-                            >
-                              {isRevealed ? (app.candidate_name || "Student") : "Anonymous Student"}
-                            </span>
-                            {app.is_verified_student && <VerifiedBadge size="sm" />}
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-foreground">Anonymous Student</span>
+                              <VerifiedBadge size="sm" />
+                            </div>
+                            <p className="text-xs text-foreground-muted">
+                              {card.faculty || "Unknown faculty"}
+                              {card.year_of_study ? ` · Year ${card.year_of_study}` : ""}
+                              {card.focus_area ? ` · ${String(card.focus_area).replace(/_/g, " ")}` : ""}
+                            </p>
                           </div>
                         </TableCell>
                         <TableCell className="px-5 py-4">
-                          {app.match_score != null ? (
-                            <span className={`font-mono text-sm ${app.match_score >= 75 ? "text-success" : "text-foreground-muted"}`}>
-                              {app.match_score}%
+                          {app.skill_match_score != null ? (
+                            <span className={`font-mono text-sm ${app.skill_match_score >= 75 ? "text-success" : "text-foreground-muted"}`}>
+                              {app.skill_match_score}%
                             </span>
                           ) : (
                             <span className="text-foreground-faint text-sm">—</span>
