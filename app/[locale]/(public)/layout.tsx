@@ -11,7 +11,7 @@ export default function PublicLayout({
   return (
     <AuthProvider>
       <Navbar />
-      <main className="flex-1 flex flex-col w-full h-full min-h-[100dvh]">
+      <main className="flex-1 flex flex-col w-full h-full">
         {children}
       </main>
       <CookieBanner />

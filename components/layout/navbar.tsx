@@ -50,7 +50,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8 min-w-0">
           {/* Left: Logo */}
-          <Link href="/listings" className="flex items-center gap-3 shrink-0">
+          <Link href="/" className="flex items-center gap-3 shrink-0">
             <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-white font-bold text-xs">
               L
             </div>
