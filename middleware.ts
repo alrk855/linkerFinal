@@ -6,8 +6,8 @@ import type { Database } from "@/types/database";
 
 const PROTECTED_PREFIXES = ["/dashboard", "/profile", "/listings", "/company", "/admin", "/acknowledgments", "/notifications"];
 
-// Internationalization definition
-const locales = ['en', 'mk'];
+// Internationalization definition (hardcoded Macedonian)
+const locales = ['mk'];
 const defaultLocale = 'mk';
 
 const intlMiddleware = createMiddleware({
@@ -39,6 +39,14 @@ function copyCookies(from: NextResponse, to: NextResponse): void {
 }
 
 export async function middleware(request: NextRequest) {
+  // Force old explicit English routes to canonical no-prefix routes.
+  // We use localePrefix='never', so '/en/foo' should become '/foo'.
+  if (request.nextUrl.pathname === "/en" || request.nextUrl.pathname.startsWith("/en/")) {
+    const stripped = request.nextUrl.pathname.replace(/^\/en/, "") || "/";
+    const redirectUrl = new URL(stripped + request.nextUrl.search, request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // 1. Run next-intl middleware first to handle routing/locales
   const intlResponse = intlMiddleware(request);
 

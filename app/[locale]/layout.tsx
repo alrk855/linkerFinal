@@ -12,12 +12,13 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
+  void locale;
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="mk" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="font-sans antialiased min-h-screen flex flex-col relative">
         <NextIntlClientProvider messages={messages}>
           {children}

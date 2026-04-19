@@ -14,7 +14,7 @@ export function Footer() {
             <div className="w-5 h-5 rounded overflow-hidden bg-accent flex items-center justify-center text-foreground font-bold text-[10px]">
               L
             </div>
-            <span className="font-medium">Linker</span>
+            <span className="font-medium text-foreground">Link<span className="text-accent">er</span></span>
             <span className="opacity-50">© {new Date().getFullYear()}</span>
           </div>
 

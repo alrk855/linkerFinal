@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { MapPin, Users, Zap } from "lucide-react";
@@ -34,6 +37,7 @@ export function ListingCard({ listing, onClick, className }: ListingCardProps) {
   const company = normalizeCompany(listing);
   const skills = normalizeSkills(listing);
   const typeStyle = TYPE_STYLES[listing.listing_type] || "";
+  const [logoError, setLogoError] = useState(false);
 
   return (
     <div
@@ -46,12 +50,13 @@ export function ListingCard({ listing, onClick, className }: ListingCardProps) {
       {/* Top row: Company and Date */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          {company.logo_url ? (
+          {company.logo_url && !logoError ? (
             <Image
               src={company.logo_url}
               alt={company.company_name}
               width={40}
               height={40}
+              onError={() => setLogoError(true)}
               className="w-10 h-10 rounded-xl object-cover shrink-0 border border-border shadow-sm"
             />
           ) : (

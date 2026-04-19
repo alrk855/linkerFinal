@@ -22,8 +22,10 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
+    setLogoError(false);
     fetch(`/api/listings/${params.id}`)
       .then(r => r.json()).then(d => setListing(d.listing || d))
       .catch(() => {}).finally(() => setLoading(false));
@@ -57,12 +59,13 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
       <div className="bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-card">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 text-accent font-bold text-xl">
-            {company?.logo_url ? (
+            {company?.logo_url && !logoError ? (
               <Image
                 src={company.logo_url}
                 alt={company?.company_name || "Company logo"}
                 width={56}
                 height={56}
+                onError={() => setLogoError(true)}
                 className="w-full h-full object-cover rounded-xl"
               />
             ) : company?.company_name?.charAt(0) || "?"}

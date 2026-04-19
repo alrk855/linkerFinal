@@ -210,6 +210,24 @@ export default function ProfileSetupPage() {
                     )}
                   </div>
                 </div>
+                {isStudent && !user.is_verified_student && (
+                  <div className="rounded-xl border border-accent/30 bg-accent/5 p-4">
+                    <p className="text-sm font-medium text-foreground">Verify with Microsoft to unlock applications</p>
+                    <p className="text-xs text-foreground-muted mt-1">
+                      Connect your UKIM Microsoft account now or finish setup and verify later from account settings.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-3 bg-background border-border"
+                      onClick={() => {
+                        window.location.href = "/auth/verify-student";
+                      }}
+                    >
+                      Verify with Microsoft
+                    </Button>
+                  </div>
+                )}
                 <FormField control={form.control} name="full_name" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Your name</FormLabel>

@@ -10,6 +10,30 @@ import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const TYPE_OPTIONS = [
+  { value: "internship", label: "Internship" },
+  { value: "part_time", label: "Part-time" },
+  { value: "full_time", label: "Full-time" },
+];
+
+const FOCUS_OPTIONS = [
+  { value: "frontend", label: "Frontend" },
+  { value: "backend", label: "Backend" },
+  { value: "fullstack", label: "Fullstack" },
+  { value: "mobile", label: "Mobile" },
+  { value: "devops", label: "DevOps" },
+  { value: "data", label: "Data" },
+  { value: "other", label: "Other" },
+];
+
+const EXPERIENCE_OPTIONS = [
+  ["all", "Any level"],
+  ["no_experience", "No experience"],
+  ["junior", "Junior"],
+  ["mid", "Mid-level"],
+  ["senior", "Senior"],
+] as const;
+
 export default function BrowseListingsPage() {
   const router = useRouter();
   const [listings, setListings] = useState<any[]>([]);
@@ -36,11 +60,7 @@ export default function BrowseListingsPage() {
       const typeOk = !selectedTypes.length || selectedTypes.includes(l.listing_type);
       const focusOk = !selectedFocus.length || selectedFocus.includes(l.focus_area);
       const lvl = (l.experience_level || "").toLowerCase();
-      const expOk = experience === "all"
-        || (experience === "none" && lvl.includes("no experience"))
-        || (experience === "junior" && lvl === "junior")
-        || (experience === "mid" && lvl.includes("mid"))
-        || (experience === "senior" && lvl === "senior");
+      const expOk = experience === "all" || lvl === experience;
       const textOk = !q
         || l.title?.toLowerCase().includes(q)
         || company?.company_name?.toLowerCase().includes(q)
@@ -64,26 +84,26 @@ export default function BrowseListingsPage() {
       </div>
       <div className="space-y-3">
         <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Type</h3>
-        {["Internship", "Part-time", "Full-time"].map((t) => (
-          <div key={t} className="flex items-center gap-2.5">
-            <Checkbox id={`type-${t}`} checked={selectedTypes.includes(t)} onCheckedChange={() => toggle(t, selectedTypes, setSelectedTypes)} />
-            <Label htmlFor={`type-${t}`} className="font-normal text-sm cursor-pointer">{t}</Label>
+        {TYPE_OPTIONS.map((t) => (
+          <div key={t.value} className="flex items-center gap-2.5">
+            <Checkbox id={`type-${t.value}`} checked={selectedTypes.includes(t.value)} onCheckedChange={() => toggle(t.value, selectedTypes, setSelectedTypes)} />
+            <Label htmlFor={`type-${t.value}`} className="font-normal text-sm cursor-pointer">{t.label}</Label>
           </div>
         ))}
       </div>
       <div className="space-y-3">
         <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Focus Area</h3>
-        {["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data"].map((f) => (
-          <div key={f} className="flex items-center gap-2.5">
-            <Checkbox id={`focus-${f}`} checked={selectedFocus.includes(f)} onCheckedChange={() => toggle(f, selectedFocus, setSelectedFocus)} />
-            <Label htmlFor={`focus-${f}`} className="font-normal text-sm cursor-pointer">{f}</Label>
+        {FOCUS_OPTIONS.map((f) => (
+          <div key={f.value} className="flex items-center gap-2.5">
+            <Checkbox id={`focus-${f.value}`} checked={selectedFocus.includes(f.value)} onCheckedChange={() => toggle(f.value, selectedFocus, setSelectedFocus)} />
+            <Label htmlFor={`focus-${f.value}`} className="font-normal text-sm cursor-pointer">{f.label}</Label>
           </div>
         ))}
       </div>
       <div className="space-y-3">
         <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Experience</h3>
         <RadioGroup value={experience} onValueChange={setExperience} className="space-y-2.5">
-          {[["all","Any level"],["none","No experience"],["junior","Junior"],["mid","Mid-level"],["senior","Senior"]].map(([v,l]) => (
+          {EXPERIENCE_OPTIONS.map(([v,l]) => (
             <div key={v} className="flex items-center gap-2.5">
               <RadioGroupItem value={v} id={`exp-${v}`} />
               <Label htmlFor={`exp-${v}`} className="font-normal text-sm cursor-pointer">{l}</Label>

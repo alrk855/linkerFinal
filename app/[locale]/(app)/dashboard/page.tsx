@@ -39,6 +39,10 @@ export default function DashboardPage() {
   if (isLoading || !user) return <div className="flex-1 p-8 animate-pulse space-y-4"><div className="h-8 bg-surface-raised rounded w-1/3" /><div className="h-32 bg-surface rounded-xl" /></div>;
 
   const pendingAcks = acks.filter((a: any) => a.status === "pending").length;
+  const profileScore = user.profile_completeness || 0;
+  const profileRecommendation = profileScore >= 100
+    ? "Your profile is complete and ready for discovery."
+    : "Complete your profile to rank higher in company discovery.";
 
   const StudentDashboard = () => (
     <div className="flex flex-col gap-8 w-full max-w-6xl mx-auto pb-12">
@@ -49,15 +53,15 @@ export default function DashboardPage() {
           {pendingAcks > 0 && <Button onClick={() => router.push("/acknowledgments")} size="sm" className="mt-3 bg-accent hover:bg-accent-hover text-white gap-1.5"><Bell size={14} /> Review</Button>}
         </div>
         <div className="w-full md:w-56 shrink-0">
-          <div className="flex justify-between mb-2"><span className="text-sm font-medium">Profile completeness</span><span className="text-sm font-bold text-accent">{user.profile_completeness || 0}%</span></div>
-          <ProfileCompleteness value={user.profile_completeness || 0} />
+          <ProfileCompleteness value={profileScore} />
+          <p className="text-xs text-foreground-muted mt-2">{profileRecommendation}</p>
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard label="Applications" value={acks.length} />
         <StatCard label="Pending requests" value={pendingAcks} />
         <StatCard label="Connections" value={acks.filter((a: any) => a.status === "accepted").length} />
-        <StatCard label="Profile score" value={`${user.profile_completeness || 0}%`} />
+        <StatCard label="Profile" value={profileScore >= 100 ? "Complete" : "Needs updates"} />
       </div>
       <div className="space-y-4">
         <div className="flex items-center justify-between"><h3 className="text-lg font-semibold">Recent Listings</h3><Button variant="link" className="text-sm text-accent p-0 h-auto font-medium" onClick={() => router.push("/listings")}>Browse all →</Button></div>

@@ -1185,6 +1185,143 @@ const STUDENTS = [
   },
 ];
 
+const PRESENTATION_COMPANY = {
+  name: "BlueOrbit Labs",
+  email: "showcase.company@demo.linker.mk",
+  username: "showcase_company",
+  contactName: "Elena Markova",
+  password: "Showcase@Company2026!",
+  website: "https://blueorbitlabs.dev",
+  logo: null,
+  description: "Presentation company account used to demo active discovery, acknowledgments, and listing management workflows.",
+  industry: "Software Product Studio",
+  size: "11-50",
+  location: "Skopje, North Macedonia",
+};
+
+const PRESENTATION_LISTING = {
+  company: PRESENTATION_COMPANY.username,
+  title: "Frontend Engineer Intern (Presentation)",
+  type: "internship",
+  focus: "frontend",
+  level: "No experience",
+  slots: 2,
+  description: `Presentation listing used for demo walkthroughs.
+
+You will build and iterate on UI features with React, Next.js, and TypeScript while collaborating with product and design.
+
+This listing is intentionally seeded with active acknowledgments to showcase inbox behavior.`,
+  skills: ["react", "nextjs", "typescript", "tailwindcss", "git"],
+};
+
+const PRESENTATION_STUDENT = {
+  username: "showcase_student",
+  email: "showcase.student@demo.linker.mk",
+  password: "Showcase@Student2026!",
+  fullName: "Mila Stojanovska",
+  faculty: "FINKI",
+  year: 4,
+  degree: "Bachelor",
+  level: "Junior",
+  focus: "frontend",
+  bio: "Presentation student account with realistic activity: applications, pending acknowledgments, and accepted company connection.",
+  github: "https://github.com/milastojanovska",
+  linkedin: "https://linkedin.com/in/milastojanovska",
+  skills: ["react", "nextjs", "typescript", "tailwindcss", "javascript", "git", "figma"],
+};
+
+async function seedShowcaseActivity({ listingMap, studentProfileMap, companyProfileMap }) {
+  const getListingId = (companyUsername, title) => listingMap[`${companyUsername}::${title}`];
+  const getStudentId = (username) => studentProfileMap[username];
+  const presentationCompanyId = companyProfileMap[PRESENTATION_COMPANY.username];
+  const presentationStudentId = getStudentId(PRESENTATION_STUDENT.username);
+
+  if (!presentationCompanyId || !presentationStudentId) {
+    console.warn("  Skipping showcase activity: missing presentation profile IDs.");
+    return;
+  }
+
+  console.log("Step 8: Seeding showcase activity...");
+
+  const showcaseAckRows = [
+    {
+      listing_id: getListingId(PRESENTATION_COMPANY.username, PRESENTATION_LISTING.title),
+      company_profile_id: presentationCompanyId,
+      student_profile_id: presentationStudentId,
+      status: "pending",
+    },
+    {
+      listing_id: getListingId(PRESENTATION_COMPANY.username, PRESENTATION_LISTING.title),
+      company_profile_id: presentationCompanyId,
+      student_profile_id: getStudentId("stefan_react"),
+      status: "accepted",
+    },
+    {
+      listing_id: getListingId("seavus_mk", "Frontend Developer Intern"),
+      company_profile_id: companyProfileMap["seavus_mk"],
+      student_profile_id: presentationStudentId,
+      status: "pending",
+    },
+  ].filter((row) => row.listing_id && row.company_profile_id && row.student_profile_id);
+
+  for (const row of showcaseAckRows) {
+    const { data: insertedAck, error: ackInsertError } = await svc.from("acknowledgments").insert({
+      listing_id: row.listing_id,
+      company_profile_id: row.company_profile_id,
+      student_profile_id: row.student_profile_id,
+    }).select("id").single();
+
+    if (ackInsertError) {
+      console.warn(`  Acknowledgment seed skipped: ${ackInsertError.message}`);
+      continue;
+    }
+
+    if (row.status !== "pending") {
+      await svc.from("acknowledgments").update({ status: row.status }).eq("id", insertedAck.id);
+    }
+  }
+
+  const showcaseAppRows = [
+    {
+      listing_id: getListingId("endava_skopje", "Junior React Developer"),
+      student_profile_id: presentationStudentId,
+      cover_note: "Presentation application: I am available 25h/week and can start immediately.",
+      status: "reviewed",
+    },
+    {
+      listing_id: getListingId("netcetera_mk", "Full-Stack Developer Intern"),
+      student_profile_id: presentationStudentId,
+      cover_note: "Presentation application: I have shipped two full-stack student projects using React and Node.js.",
+      status: "pending",
+    },
+    {
+      listing_id: getListingId(PRESENTATION_COMPANY.username, PRESENTATION_LISTING.title),
+      student_profile_id: getStudentId("ivan_fullstack"),
+      cover_note: "I am interested in product-focused internship work.",
+      status: "acknowledged",
+    },
+  ].filter((row) => row.listing_id && row.student_profile_id);
+
+  for (const row of showcaseAppRows) {
+    const { data: insertedApp, error: appInsertError } = await svc.from("applications").insert({
+      listing_id: row.listing_id,
+      student_profile_id: row.student_profile_id,
+      cover_note: row.cover_note,
+    }).select("id").single();
+
+    if (appInsertError) {
+      console.warn(`  Application seed skipped: ${appInsertError.message}`);
+      continue;
+    }
+
+    if (row.status !== "pending") {
+      await svc.from("applications").update({ status: row.status }).eq("id", insertedApp.id);
+    }
+  }
+
+  console.log("✓ Showcase activity seeded\n");
+}
+
 // ─── Main Seed Logic ──────────────────────────────────────────────────────────
 
 async function main() {
@@ -1227,6 +1364,8 @@ async function main() {
   const requiredSkillSlugs = new Set([
     ...LISTINGS.flatMap((listing) => listing.skills),
     ...STUDENTS.flatMap((student) => student.skills),
+    ...PRESENTATION_LISTING.skills,
+    ...PRESENTATION_STUDENT.skills,
   ]);
   const missingRequiredSkills = Array.from(requiredSkillSlugs).filter((slug) => !skillMap[slug]);
   if (missingRequiredSkills.length > 0) {
@@ -1277,13 +1416,49 @@ async function main() {
     companyProfileMap[co.username] = cp.id;
     console.log(`  ✓ ${co.name}`);
   }
+
+  {
+    const co = PRESENTATION_COMPANY;
+    const user = await createUser(co.email, co.password, co.contactName, "company");
+    if (user) {
+      const { error: profileError } = await svc.from("profiles").upsert({
+        id: user.id,
+        username: co.username,
+        full_name: co.contactName,
+        role: "company",
+        website_url: co.website,
+      }, { onConflict: "id" });
+
+      if (!profileError) {
+        const { data: cp } = await svc.from("company_profiles").insert({
+          profile_id: user.id,
+          company_name: co.name,
+          company_email: co.email,
+          company_website: co.website,
+          company_description: co.description,
+          industry: co.industry,
+          size_range: co.size,
+          location: co.location,
+          logo_url: co.logo,
+          approval_status: "approved",
+          approved_at: new Date().toISOString(),
+        }).select("id").single();
+
+        if (cp?.id) {
+          companyProfileMap[co.username] = cp.id;
+          console.log(`  ✓ ${co.name} (presentation)`);
+        }
+      }
+    }
+  }
   console.log(`✓ ${Object.keys(companyProfileMap).length} companies created\n`);
 
   // 6. Create listings
   console.log("Step 6: Creating listings...");
   let listingCount = 0;
+  const listingMap = {};
 
-  for (const listing of LISTINGS) {
+  for (const listing of [...LISTINGS, PRESENTATION_LISTING]) {
     const companyProfileId = companyProfileMap[listing.company];
     if (!companyProfileId) { console.warn(`  No company profile for ${listing.company}`); continue; }
 
@@ -1328,6 +1503,7 @@ async function main() {
     }
 
     listingCount++;
+    listingMap[`${listing.company}::${listing.title}`] = newListing.id;
     console.log(`  ✓ ${listing.title} (${listing.company})`);
   }
   console.log(`✓ ${listingCount} listings created\n`);
@@ -1335,8 +1511,9 @@ async function main() {
   // 7. Create students
   console.log("Step 7: Creating student users...");
   let studentCount = 0;
+  const studentProfileMap = {};
 
-  for (const st of STUDENTS) {
+  for (const st of [...STUDENTS, PRESENTATION_STUDENT]) {
     const user = await createUser(st.email, st.password, st.fullName, "student");
     if (!user) { console.warn(`  Skipping ${st.username}`); continue; }
 
@@ -1395,12 +1572,15 @@ async function main() {
     }
 
     studentCount++;
+    studentProfileMap[st.username] = user.id;
     console.log(`  ✓ ${st.fullName} (${st.username})`);
   }
   console.log(`✓ ${studentCount} students created\n`);
 
-  // 8. Write credentials file
-  console.log("Step 8: Writing credentials file...");
+  await seedShowcaseActivity({ listingMap, studentProfileMap, companyProfileMap });
+
+  // 9. Write credentials file
+  console.log("Step 9: Writing credentials file...");
   const lines = [
     "# Linker Demo Credentials",
     "# Generated: " + new Date().toISOString(),
@@ -1411,20 +1591,25 @@ async function main() {
     "Role:     admin",
     "Note:     Sign in with Google OAuth using this email. Admin panel at /admin",
     "",
-    "## COMPANIES (10)",
-    ...COMPANIES.map((co, i) =>
+    `## COMPANIES (${COMPANIES.length + 1})`,
+    ...[...COMPANIES, PRESENTATION_COMPANY].map((co, i) =>
       `${i+1}. ${co.name}\n   Email:    ${co.email}\n   Password: ${co.password}\n   Username: ${co.username}`
     ),
     "",
-    "## STUDENTS (10)",
-    ...STUDENTS.map((st, i) =>
+    `## STUDENTS (${STUDENTS.length + 1})`,
+    ...[...STUDENTS, PRESENTATION_STUDENT].map((st, i) =>
       `${i+1}. ${st.fullName}\n   Email:    ${st.email}\n   Password: ${st.password}\n   Username: ${st.username}\n   Focus:    ${st.focus} | ${st.level}\n   Skills:   ${st.skills.slice(0,5).join(", ")}...`
     ),
+    "",
+    "## PRESENTATION QUICK LOGIN",
+    `Student Demo: ${PRESENTATION_STUDENT.email} | ${PRESENTATION_STUDENT.password}`,
+    `Company Demo: ${PRESENTATION_COMPANY.email} | ${PRESENTATION_COMPANY.password}`,
     "",
     "## NOTES",
     "- All students are pre-verified (is_verified_student = true)",
     "- All companies are pre-approved (approval_status = approved)",
-    "- Each company has 2 active listings (20 total)",
+    "- Each standard company has 2 active listings; the presentation company has 1 dedicated listing",
+    "- Seed includes active showcase activity (pending/accepted acknowledgments and pending/reviewed/acknowledged applications)",
     "- Admin access requires: sign in with Google + master password via /api/admin/auth",
     "- Master password: configured in local .env.local (not included in repository)",
   ];
