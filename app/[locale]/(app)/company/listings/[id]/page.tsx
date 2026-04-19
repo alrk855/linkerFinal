@@ -42,6 +42,7 @@ export default function CompanyListingDetailPage({ params }: { params: { id: str
   const [listing, setListing] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actingId, setActingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -79,6 +80,63 @@ export default function CompanyListingDetailPage({ params }: { params: { id: str
       toast.success(`Огласот е ${!listing.is_active ? "активиран" : "деактивиран"}.`);
     } catch {
       toast.error("Неуспешна промена на огласот");
+    }
+  };
+
+  const handleUpdateApplicationStatus = async (
+    applicationId: string,
+    status: "reviewed" | "acknowledged" | "rejected"
+  ) => {
+    setActingId(applicationId);
+    try {
+      const res = await fetch(`/api/applications/${applicationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error?.message || "Неуспешно ажурирање апликација");
+      }
+
+      const body = await res.json();
+      const nextStatus = body?.application?.status || status;
+
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === applicationId
+            ? {
+                ...app,
+                status: nextStatus,
+                updated_at: body?.application?.updated_at || app.updated_at,
+              }
+            : app
+        )
+      );
+
+      if (body?.acknowledgment_created) {
+        setListing((prev: any) =>
+          prev
+            ? {
+                ...prev,
+                slots_remaining: Math.max(0, (prev.slots_remaining ?? 0) - 1),
+              }
+            : prev
+        );
+      }
+
+      if (nextStatus === "reviewed") {
+        toast.success("Апликацијата е означена како прегледана.");
+      } else if (nextStatus === "acknowledged") {
+        toast.success("Апликацијата е потврдена.");
+      } else {
+        toast.success("Апликацијата е одбиена.");
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "Неуспешно ажурирање апликација.");
+    } finally {
+      setActingId(null);
     }
   };
 
@@ -186,18 +244,24 @@ export default function CompanyListingDetailPage({ params }: { params: { id: str
                   <TableHead className="font-medium text-foreground-muted py-4 px-5">Совпаѓање</TableHead>
                   <TableHead className="font-medium text-foreground-muted py-4 px-5 hidden sm:table-cell">Аплицирано</TableHead>
                   <TableHead className="font-medium text-foreground-muted py-4 px-5">Статус</TableHead>
+                  <TableHead className="font-medium text-foreground-muted py-4 px-5 text-right">Акции</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-border">
                 {applications.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-12 text-foreground-muted text-sm">
+                    <TableCell colSpan={5} className="text-center py-12 text-foreground-muted text-sm">
                       Се уште нема апликации.
                     </TableCell>
                   </TableRow>
                 ) : (
                   applications.map((app) => {
                     const card = app.student_card || {};
+                    const canReview = app.status === "pending";
+                    const canAcknowledge = app.status === "pending" || app.status === "reviewed";
+                    const canReject = app.status === "pending" || app.status === "reviewed";
+                    const noSlotsLeft = (listing?.slots_remaining ?? 0) <= 0;
+                    const disableAcknowledge = noSlotsLeft && app.status !== "acknowledged";
                     return (
                       <TableRow key={app.id} className="hover:bg-surface-raised transition-colors">
                         <TableCell className="px-5 py-4">
@@ -235,6 +299,49 @@ export default function CompanyListingDetailPage({ params }: { params: { id: str
                           >
                             {formatApplicationStatus(app.status)}
                           </span>
+                        </TableCell>
+                        <TableCell className="px-5 py-4 text-right">
+                          <div className="flex justify-end gap-2 flex-wrap">
+                            {canReview ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="bg-surface hover:bg-surface-raised border-border"
+                                disabled={actingId === app.id}
+                                onClick={() => handleUpdateApplicationStatus(app.id, "reviewed")}
+                              >
+                                Прегледај
+                              </Button>
+                            ) : null}
+
+                            {canAcknowledge ? (
+                              <Button
+                                size="sm"
+                                className="bg-accent hover:bg-accent-hover text-background"
+                                disabled={actingId === app.id || disableAcknowledge}
+                                onClick={() => handleUpdateApplicationStatus(app.id, "acknowledged")}
+                                title={disableAcknowledge ? "Нема преостанати слотови" : undefined}
+                              >
+                                Потврди
+                              </Button>
+                            ) : null}
+
+                            {canReject ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                                disabled={actingId === app.id}
+                                onClick={() => handleUpdateApplicationStatus(app.id, "rejected")}
+                              >
+                                Одбиј
+                              </Button>
+                            ) : null}
+
+                            {!canReview && !canAcknowledge && !canReject ? (
+                              <span className="text-xs text-foreground-faint">—</span>
+                            ) : null}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
